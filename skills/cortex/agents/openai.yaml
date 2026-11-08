@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cortex"
+  short_description: "Chief of staff for separate coordinator threads and evidence"
+  default_prompt: "Use $cortex to bootstrap this thread as my chief of staff. Route assignments to separate coordinator threads using both Codex and Cursor execution workers, and bring their verified evidence back here."

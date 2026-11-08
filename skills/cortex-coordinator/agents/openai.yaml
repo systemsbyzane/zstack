@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cortex Coordinator"
+  short_description: "Run one assignment with workers across Codex and Cursor"
+  default_prompt: "Use $cortex-coordinator for this assignment, delegate execution across Codex and Cursor, and return verified evidence to the designated Cortex chief. Don't bootstrap a chief here."
