@@ -9,6 +9,17 @@ This is the user's home thread, not an assignment worker or assignment coordinat
 
 If you are a delegated worker or an assignment coordinator, follow your assigned role instead; do not bootstrap another chief. Assignment threads use the separate `cortex-coordinator` skill, normally `~/.codex/skills/cortex-coordinator/SKILL.md`.
 
+## Fast execution policy — explicit user preference
+
+For Cortex assignments, do not write, repair, run or expand automated tests, test suites or coverage, and do not chase test-only CI failures unless the user explicitly requests that work. This user preference overrides earlier skill defaults for TDD, regression tests and test gates. Nightly CI is user-owned deferred verification; do not claim it has run or passed. Do not disable CI, delete existing tests, bypass branch protections or claim merge readiness when required external checks are unknown/failing.
+
+Keep actual product evidence: a focused real browser walkthrough, screenshots/video, persistence checks when requested, and requested backend measurements. These are demonstration/acceptance work, not permission to run automated suites. Run build/typecheck only when necessary to start or demonstrate the changed product; no routine lint/static/full-repo gates. Missing automated tests alone does not block the Cortex handoff; say they were intentionally deferred. Council reviews the scoped diff and existing evidence without demanding tests/coverage or executing suites. Keep existing independent panel and bounded rounds for behavior changes.
+
+Use one bounded environment preflight slice, aiming for 5–10 minutes at its next safe boundary: verify exact target revision, required Node/runtime, package selector, supported startup command, credential separation and fixture/actor prerequisites. Reuse verified facts and an already-compatible authorized runtime when safe; never share mutable databases or credentials across incompatible assignments. Do not duplicate full source/branch discovery across coordinators: chief supplies verified common identity. Inspect only prerequisites needed for the next action, not the entire repository. A failure beyond this bound returns a concrete blocker and the smallest recovery action instead of an open-ended setup investigation. Timing is guidance at event boundaries, not a watchdog guarantee.
+
+One environment owner prepares and preserves the instance, then hands readiness details directly to the evidence worker. Avoid repeated database recreation, seed/model calls and redundant coordinator reruns. Reuse valid evidence at the same snapshot; after a change recheck only affected acceptance behavior. Pass exact existing authorizations with each brief; corrected command syntax within the same authorized effects does not require renewed approval. New migrations, resets, targets or shared mutations still require exact authorization. Route AWS/connected Jira work to a provider with verified access; user-authorized provider changes are retained.
+
+
 ## Bootstrap
 
 Read [protocol.md](references/protocol.md). Establish the current thread's actual ID, environment, exact returned link, and project through supported T3 context/tools; do not invent them. Create durable chief state at `~/.codex/cortex/chiefs/<chief-thread-id>/state.json` (encode path-unsafe characters in the ID), or another explicitly authorized local persistent directory. Record that exact path in this thread. Keep the state out of version control and exclude credentials. The state contains chief identity and an assignment roster with task IDs, coordinator thread/environment/link, project, scope, authority, workspace/base, provider dispatch summaries, state, last event ID, evidence, decisions and delivery receipts. Write state atomically and preserve existing records.
@@ -48,3 +59,7 @@ If either execution provider is unavailable, the coordinator reports that to thi
 ## Bound long-running assignments
 
 Include the coordinator's assignment-wide progress and stopping budget in every assignment envelope. Keep elapsed start, repair cycles and Council rounds in the roster across successor threads and resumes. A checkpoint for repeated failed fixes, no accepted milestone after 60 minutes, 120 minutes total elapsed, or exhausted repair/review budget becomes Needs you. Present completed evidence, remaining blocker and a bounded recommendation; do not automatically send “continue,” relaunch a replacement, or interpret an agent's recommendation as user authorization. Only an explicit user continuation establishes the next bounded allowance. These checks happen on actual messages/dispatch boundaries, not background timers, and cannot guarantee interruption of a silent running worker.
+
+## Status display contract
+
+For material reports and chief display updates, follow [status reporting v1](references/status-reporting.md). The chief alone owns persisted state and sanitized projection; a read-only board never proves live execution or handles user review.

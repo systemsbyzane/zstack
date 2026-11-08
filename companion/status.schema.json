@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cortex status projection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "chief",
+    "assignments"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "chief": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "link"
+      ],
+      "properties": {
+        "link": {
+          "type": "string"
+        }
+      }
+    },
+    "assignments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "assignmentId",
+          "title",
+          "status",
+          "phase",
+          "summary",
+          "lastReportedAt",
+          "coordinatorLink",
+          "blocker",
+          "decisionNeeded",
+          "testedRevision",
+          "reviewState"
+        ],
+        "properties": {
+          "assignmentId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "needs-you",
+              "blocked",
+              "ready-for-review",
+              "working",
+              "done",
+              "unknown"
+            ]
+          },
+          "phase": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "lastReportedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "coordinatorLink": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "blocker": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "decisionNeeded": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "testedRevision": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reviewState": {
+            "enum": [
+              "not-requested",
+              "pending",
+              "handled"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

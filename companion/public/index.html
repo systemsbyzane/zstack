@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Cortex status board</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Local read-only view</p>
+        <h1>Cortex status</h1>
+      </div>
+      <button id="refreshButton" type="button">Refresh snapshot</button>
+    </header>
+
+    <p id="message" class="message" role="status" aria-live="polite">
+      Status has not been loaded. Select Refresh snapshot to read it.
+    </p>
+    <div id="snapshotInfo" class="snapshot-info" aria-live="polite"></div>
+    <p class="notice">
+      This board reads a status file. A file read does not prove that an assignment is currently running.
+      Ready-for-review assignments remain listed until the user reviews them.
+    </p>
+    <div id="chiefLink" class="chief-link"></div>
+    <main id="board" aria-live="polite"></main>
+    <section class="reply-panel" aria-labelledby="replyHeading">
+      <h2 id="replyHeading">Reply to the fixed Cortex chief</h2>
+      <p class="reply-notice">
+        This local, single-user board sends text only after the fixed chief target is verified.
+        The message is labeled as untrusted board input; it is not authenticated authority or an approval.
+        No message is sent until you select a button below.
+      </p>
+      <form id="replyForm">
+        <label for="replyText">Message</label>
+        <textarea id="replyText" name="text" rows="6" maxlength="8000" spellcheck="true" required></textarea>
+        <div class="reply-actions">
+          <button id="sendReplyButton" type="submit">Send to fixed chief</button>
+          <button id="retryReplyButton" type="button" hidden>Retry known-unsent message</button>
+          <button id="reconcileReplyButton" type="button" hidden>Check recent chief messages</button>
+          <button id="recoverReplyButton" type="button">Recover previous submission</button>
+        </div>
+      </form>
+      <p id="replyMessage" class="reply-message" role="status" aria-live="polite">
+        Drafts remain on this Mac. Uncertain submissions are never sent again automatically.
+      </p>
+    </section>
+  </body>
+</html>

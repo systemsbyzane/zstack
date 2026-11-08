@@ -9,6 +9,17 @@ The parent coordinates a three-model, independent review. Members review; they d
 
 When a Cortex chief-of-staff thread is managing an assignment, this review phase belongs in its separate `cortex-coordinator` thread. The chief routes the request and relays the returned verdict/evidence; it does not become the assignment reviewer or tester. References below to Cortex’s execution/final-verification gate mean the gate in `cortex-coordinator/SKILL.md`, not permission for the chief to run product work. Standalone Council reviews outside that chief workflow retain their normal scope.
 
+## Fast execution policy — explicit user preference
+
+For Cortex assignments, do not write, repair, run or expand automated tests, test suites or coverage, and do not chase test-only CI failures unless the user explicitly requests that work. This user preference overrides earlier skill defaults for TDD, regression tests and test gates. Nightly CI is user-owned deferred verification; do not claim it has run or passed. Do not disable CI, delete existing tests, bypass branch protections or claim merge readiness when required external checks are unknown/failing.
+
+Keep actual product evidence: a focused real browser walkthrough, screenshots/video, persistence checks when requested, and requested backend measurements. These are demonstration/acceptance work, not permission to run automated suites. Run build/typecheck only when necessary to start or demonstrate the changed product; no routine lint/static/full-repo gates. Missing automated tests alone does not block the Cortex handoff; say they were intentionally deferred. Council reviews the scoped diff and existing evidence without demanding tests/coverage or executing suites. Keep existing independent panel and bounded rounds for behavior changes.
+
+Use one bounded environment preflight slice, aiming for 5–10 minutes at its next safe boundary: verify exact target revision, required Node/runtime, package selector, supported startup command, credential separation and fixture/actor prerequisites. Reuse verified facts and an already-compatible authorized runtime when safe; never share mutable databases or credentials across incompatible assignments. Do not duplicate full source/branch discovery across coordinators: chief supplies verified common identity. Inspect only prerequisites needed for the next action, not the entire repository. A failure beyond this bound returns a concrete blocker and the smallest recovery action instead of an open-ended setup investigation. Timing is guidance at event boundaries, not a watchdog guarantee.
+
+One environment owner prepares and preserves the instance, then hands readiness details directly to the evidence worker. Avoid repeated database recreation, seed/model calls and redundant coordinator reruns. Reuse valid evidence at the same snapshot; after a change recheck only affected acceptance behavior. Pass exact existing authorizations with each brief; corrected command syntax within the same authorized effects does not require renewed approval. New migrations, resets, targets or shared mutations still require exact authorization. Route AWS/connected Jira work to a provider with verified access; user-authorized provider changes are retained.
+
+
 ## Panel and model discovery
 
 The user's default seats are:

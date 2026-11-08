@@ -1,0 +1,7 @@
+node_modules/
+.local/
+*.log
+submission-journal.json
+server.identity
+.env
+*.app/

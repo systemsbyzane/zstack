@@ -18,3 +18,7 @@ Pin that thread manually. Runtime state, credentials and project artifacts are n
 ## License
 
 MIT. Council includes adaptations of tstack; its original notice is preserved in `skills/council/references/upstream.md`.
+
+## Companion app
+
+Experimental lightweight status board and Mac launcher source: [companion](companion/README.md). Local configuration required; no runtime state or credentials included.
