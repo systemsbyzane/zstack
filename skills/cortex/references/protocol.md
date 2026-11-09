@@ -40,3 +40,7 @@ The chief validates source identity using trusted tool metadata against its rost
 ## Feedback envelope
 
 Include assignmentId, event/revision being reviewed, exact user feedback, and any newly authorized action/target. The coordinator rereads its tracker, preserves Cortex Coordinator mode, and dispatches the next worker slice; broad feedback does not turn it into a worker. The chief records the send receipt and awaits the next material event, rather than repeatedly asking for status.
+
+## Checkpoint packet and chief disposition
+
+Time/retry/review thresholds route to the chief, not automatically to the user. A checkpoint event includes completed evidence, remaining acceptance, actual cumulative elapsed/counters, failed approaches, proposed next step, expected duration, risks and exact authority needed. Use working/checkpoint-awaiting-chief when only supervision is needed; needs-you is reserved for an actual user decision. Chief records continue/redirect/stop, rationale, authorized scope, next milestone/time ceiling and stable delivery receipt; existing user authorizations travel unchanged. New scope, authority, user hard limits and consequential unresolved tradeoffs still require the user. No polling or automatic endless extension.
