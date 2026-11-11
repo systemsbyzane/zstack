@@ -1,4 +1,4 @@
 interface:
   display_name: "Cortex Coordinator"
-  short_description: "Run one assignment with workers across Codex and Cursor"
-  default_prompt: "Use $cortex-coordinator for this assignment, delegate execution across Codex and Cursor, and return verified evidence to the designated Cortex chief. Don't bootstrap a chief here."
+  short_description: "Own delegated work, integration, tests and delivery"
+  default_prompt: "Use $cortex-coordinator to complete this assignment autonomously with suitable subagents. Integrate, test and fix the result, then return verified deliverables to the designated Cortex chief."
