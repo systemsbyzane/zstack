@@ -8,4 +8,9 @@ Chief is sole writer of state.json and an atomic sanitized status.json plus stat
 
 Ready for review stays pending until explicit user review; reading a report or board never handles review. New revision may supersede earlier evidence but cannot silently dismiss pending review. Display last-reported state, unknown timestamps and stale indicators (threshold disclosed); file reads do not establish live execution. Viewing/refreshing is read-only and never dispatches agents, approves actions, calls model/agent APIs, or mutates chief state. Board serves only fixed sanitized projection through an allowlisted read-only loopback endpoint, no arbitrary paths or raw state. Done is collapsed by default.
 
-For supervision-only checkpoints use working with phase checkpoint-awaiting-chief; a duration/retry threshold alone is not needs-you. Chief records a bounded continue/redirect/stop decision within existing user authority. Real user decisions remain needs-you; completed results remain ready pending explicit review.
+Use working for autonomous execution. Material coordination decisions may be recorded without stopping execution or requiring permission renewals. Real user decisions remain needs-you; completed results remain ready pending explicit review.
+
+
+## Autonomous execution update
+
+Time/retry checkpoints are informational, not permission-renewal gates. Do not pause at arbitrary durations or cycle counts. Use working for autonomous execution and needs-you only for genuinely missing user input/authority. Keep existing explicit task hard limits and truthful historical accounting. Status projections never dispatch workers or approve actions.

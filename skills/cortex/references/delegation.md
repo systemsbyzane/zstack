@@ -1,3 +1,3 @@
-# Assignment coordinator reference
+# Delegation
 
-Cortex is now the chief of staff. Assignment execution uses `~/.codex/skills/cortex-coordinator/SKILL.md`; its corresponding reference is `~/.codex/skills/cortex-coordinator/references/delegation.md`. The chief delegates execution and does not adopt the coordinator role.
+Use the coordinator [delegation guidance](../../cortex-coordinator/references/delegation.md). Cortex routes outcomes; coordinators own autonomous execution and integration.
