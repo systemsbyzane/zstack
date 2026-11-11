@@ -27,6 +27,14 @@ Integrate returned work, test the actual affected behavior, fix evidenced issues
 
 Review proportionately. Use independent review for consequential changes or when requested; Council applies when explicitly requested or when its panel is appropriate and available. Do not require every model/provider or a full panel on every assignment. Reproduce or substantiate findings before expanding scope. Fix small findings directly where host rules require; substantial fixes may go to the owner. New delegated reviews/rechecks use fresh tasks as required by the host. Stop a failing approach and change it deliberately rather than repeating patch/review cycles without measured gains.
 
+## Quiet progress checks
+
+When worker output or a supported milestone/completion event arrives, briefly compare it with the assigned outcome and current phase: is useful progress visible, is work still in scope, and is the same failed approach repeating? Reuse the available output; do not request a separate status report, acknowledgment, or reasoning transcript. Healthy work continues without a message, pause, or approval gate. No fixed report template or per-check log is required.
+
+If evidence shows drift or a repeated stall, the coordinator handles it with one concise, actionable correction through supported controls, preserving useful work and its owner where practical. Keep incidental discoveries separate from the assigned finish line. Do not forward routine checks or corrections to Cortex; report only a material dependency change, an assignment-level blocker, or the integrated result.
+
+This is event-driven supervision, not background monitoring: follow the delegate's returned `next` instructions. Do not poll running tasks or thread output, create timer/watchdog agents, or interrupt execution merely to check progress. A quiet interval alone does not prove a stall. Host restrictions take precedence over any desired check-in cadence.
+
 ## Usage and escalation
 
 No default hourly, call, repair-cycle, or review-round budgets require chief renewal. Use judgment to keep usage proportional: no redundant setup, duplicate workers, repeated blind retries, premature review panels, or idle execution while awaiting user input. Explicit user hard ceilings and global worker limits remain binding. Model choice follows task complexity and demonstrated performance; Luna is not mandatory. Resolve actual provider/model capabilities, disclose choices, and never silently substitute a specifically requested model.
