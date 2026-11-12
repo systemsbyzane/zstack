@@ -25,7 +25,7 @@ The coordinator owns how to delegate, integrate changes, run appropriate checks,
 
 ## Supervise without becoming a relay loop
 
-Receive material progress, real blockers, and completed results. Do not require acknowledgments or forward every internal worker event to the user. A worker's completion is not assignment completion. Report progress as user outcomes: cases completed, measured behavior, remaining defects, and deliverable readiness.
+Receive material progress, real blockers, and completed results. Keep routine worker chatter, setup corrections, and resource handoff acknowledgments inside coordinator threads. Update the user for a meaningful outcome, a material change affecting their expectations, a decision they must make, or their explicit status request; do not echo every internal event. Do not require acknowledgments or forward every internal worker event to the user. A worker's completion is not assignment completion. Report progress as user outcomes: cases completed, measured behavior, remaining defects, and deliverable readiness.
 
 No default agent-hour allowances, mandatory renewal packets, or fixed repair/review counts apply. Coordinators continue authorized work autonomously. Use usage awareness to avoid duplicate effort, idle workers, repeated setup, unbounded retries, and oversized review panels. Keep accounting when useful or explicitly required, but do not turn it into a permission mechanism. Preserve existing task-specific hard limits and honest historical ledgers.
 

@@ -2,7 +2,7 @@
 
 Use [clear task communication](communication.md) for all human-readable briefs and reports. Keep machine identifiers and ledgers in metadata/trackers; they supplement, rather than replace, readable instructions.
 
-Resolve actual thread/project/environment IDs and links through supported tools. The chief alone owns its atomic state and sanitized projection. Record assignment identity, coordinator link/workspace, outcome, phase order, authority/exclusions, ownership, evidence, decisions, and delivery receipts; exclude secrets.
+Resolve actual thread/project/environment IDs and links through supported tools. The chief alone owns its atomic state and sanitized projection. Record assignment identity, coordinator link/workspace, outcome, phase order, authority/exclusions, ownership, evidence, decisions, and delivery receipts; exclude secrets. Each assignment has one current instruction record: effective authority, next outcome, owner, and any active hold with a release condition. Mark replaced instructions superseded; a late event must not revive them.
 
 An assigned task authorizes creating its separate coordinator thread in this workflow. Launch through supported T3 workspace binding with the complete assignment and return destination. After uncertain delivery, reconcile existing threads/receipts before retrying; do not duplicate assignments or invent bindings. Follow the host's launch/read/wait requirements and exact-link rules.
 
