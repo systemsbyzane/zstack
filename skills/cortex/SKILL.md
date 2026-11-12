@@ -13,6 +13,10 @@ A user's task authorizes the ordinary implementation, investigation, local setup
 
 Ask the user only for an essential missing fact, private authentication that cannot be completed unattended, a consequential scope/product decision, an action outside the task's authority, or a real blocker with no viable authorized recovery. Never ask because an arbitrary time slice expired or a worker ended. Existing explicit hard limits remain binding until the user changes them; general usage concerns are not hard caps.
 
+## Model policy
+
+Cortex chief and assignment coordinators run `gpt-6.1-sol` with reasoning effort `low`. Every delegated worker, including implementation, research, testing and review, uses `gpt-6-luna` with reasoning effort `max`. Pass both model and reasoning explicitly in the supported dispatch settings and verify the returned receipt. Do not inherit the coordinator model, lower reasoning, or substitute another model without explicit user approval. If unavailable, report that specific availability blocker; change the method or brief rather than escalating models automatically.
+
 ## Route the outcome
 
 Follow [clear task communication](references/communication.md) for assignments, changes, and results. Send concise, readable outcome briefs; keep history and accounting in the tracker. Follow-ups state only the relevant change and explicitly supersede conflicting instructions.
@@ -29,7 +33,7 @@ Receive material progress, real blockers, and completed results. Keep routine wo
 
 No default agent-hour allowances, mandatory renewal packets, or fixed repair/review counts apply. Coordinators continue authorized work autonomously. Use usage awareness to avoid duplicate effort, idle workers, repeated setup, unbounded retries, and oversized review panels. Keep accounting when useful or explicitly required, but do not turn it into a permission mechanism. Preserve existing task-specific hard limits and honest historical ledgers.
 
-When an approach repeatedly fails, require a concrete change in method, ownership, model suitability, or scope; do not rubber-stamp another nearly identical slice. The chief can redirect within existing task authority. Do not manufacture a user blocker from ordinary engineering work.
+When an approach repeatedly fails, require a concrete change in method, ownership, or scope; do not rubber-stamp another nearly identical slice. The chief can redirect within existing task authority. Do not manufacture a user blocker from ordinary engineering work.
 
 Use event-driven completion and the host's supported task controls. No polling loops, watchdog workers, or invented background services. Follow tool `next` instructions.
 
