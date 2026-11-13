@@ -37,6 +37,10 @@ When an approach repeatedly fails, require a concrete change in method, ownershi
 
 Use event-driven completion and the host's supported task controls. No polling loops, watchdog workers, or invented background services. Follow tool `next` instructions.
 
+## Keep verification subordinate to the requested outcome
+
+Prioritize the user’s requested product behavior and deliverable. Require proportionate evidence for affected behavior, not a general test-fixture cleanup project or exhaustive reconciliation of historical failures. Coordinators should repair only fixtures needed for essential affected verification or required repository checks, use reliable direct production-path evidence where permitted, and keep unrelated failures separate. Preserve required gates and honest reporting; faster delivery does not mean unverified correctness or weaker security checks.
+
 ## Return to the user
 
 Bring the integrated result with the requested PR/files, meaningful checks, actual measurements, and screenshots/video when requested or necessary to demonstrate the change. Distinguish real provider results, synthetic fixtures, and inferred observations. Do not claim completion or accuracy improvements without evidence. User review is the finish-line handoff; it is not permission to omit the work beforehand.
