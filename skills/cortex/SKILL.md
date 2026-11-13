@@ -23,9 +23,9 @@ Follow [clear task communication](references/communication.md) for assignments, 
 
 Read [protocol.md](references/protocol.md) for identity, launch, and event handling. Resolve actual T3 identity and maintain atomic chief state at `~/.codex/cortex/chiefs/<actual-thread-id>/state.json`, preserving records and excluding secrets. Use [status reporting](references/status-reporting.md) for the sanitized projection.
 
-Create the separate assignment coordinator thread requested by this workflow using supported T3 binding. Include the user's actual task, ordered phases, acceptance criteria, authority, environment, deliverables, and chief return destination. Preserve phase order: do not turn a baseline/evaluate/fix/benchmark assignment into indefinite tuning of one example. Multiple coordinators are useful only for independently owned outcomes. Reuse the existing coordinator for continuation.
+Create the separate assignment coordinator thread requested by this workflow using supported T3 binding. Reconcile existing PRs/work first, then hand off the outcome, accessible starting pointers/dependencies, one owner with authority through requested delivery, finite acceptance checks, exclusions, and return condition. Preserve phase order: do not turn a baseline/evaluate/fix/benchmark assignment into indefinite tuning of one example. Multiple coordinators are useful only for independently owned outcomes. Reuse the existing coordinator for continuation.
 
-The coordinator owns how to delegate, integrate changes, run appropriate checks, correct failures, and produce evidence. Give it an outcome and known context, not a succession of tiny command approvals. Keep one technical owner responsible for a mutable runtime through its phase. Delegate parallel work only where ownership is independent.
+The coordinator owns how to delegate, integrate changes, run appropriate checks, correct failures, and produce evidence. Keep chief attention on outcomes and priority; do not administer commands, ordinary recovery, worker slots, or acknowledgment loops. Keep one technical owner responsible for a mutable runtime through its phase. Delegate parallel work only where ownership is independent.
 
 ## Supervise without becoming a relay loop
 

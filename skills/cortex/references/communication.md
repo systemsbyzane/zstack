@@ -7,12 +7,14 @@ Apply this to chief-to-coordinator messages, coordinator-to-worker briefs, direc
 Lead with the requested outcome and phase order. Include only context needed to execute this assignment:
 
 - **Outcome:** the concrete result to deliver and why it matters.
-- **Starting point:** accessible workspace/revision, current phase, verified setup, and relevant source or artifact pointers.
-- **Ownership and authority:** who owns files/runtime, what work is authorized, and task-specific boundaries that affect this assignment.
-- **Acceptance:** observable behavior, checks, measurements, and deliverables required for completion.
-- **Return:** useful results/evidence, unresolved issues, and genuine decisions. Ordinary recoverable errors remain with the owner.
+- **Starting point:** reconcile existing PRs, changes, and active work first; give the accessible workspace/revision, verified setup, exact source/artifact pointers, and dependencies.
+- **Ownership and authority:** name the outcome owner, who owns each mutable file/runtime, what work is authorized through delivery, and scope exclusions. Keep that owner through ordinary implementation, setup, diagnosis, fixes, focused verification, and requested publication.
+- **Acceptance:** define a finite set of observable checks and deliverables that closes this outcome at its current revision. Keep unrelated baseline failures separate with evidence; do not turn them into default scope.
+- **Return:** name the finish-line handoff and when to report it: deliverables, tested revision, checks/evidence, gaps, and any genuine decision or external blocker. Ordinary recoverable errors remain with the owner.
 
 Use these as a content guide, not mandatory headings or boilerplate. A simple task needs only a short paragraph. A complex task may need more detail, but put the essential action first and organize it in readable paragraphs or a short list.
+
+Change phase or authority only when scope, priority, ownership, or a consequential dependency materially changes. Routine command, setup, fixture, and test failures are recovery within the assigned outcome, not new approval gates or per-command handoffs.
 
 Use normal spaces, punctuation, complete sentences, and exact identifiers. Never compress prose into joined words, all-caps constraint streams, or semicolon-packed status dumps to save tokens. Preserve code, hashes and paths literally when needed, but explain their purpose.
 
