@@ -13,25 +13,33 @@ A user's task authorizes the ordinary implementation, investigation, local setup
 
 Ask the user only for an essential missing fact, private authentication that cannot be completed unattended, a consequential scope/product decision, an action outside the task's authority, or a real blocker with no viable authorized recovery. Never ask because an arbitrary time slice expired or a worker ended. Existing explicit hard limits remain binding until the user changes them; general usage concerns are not hard caps.
 
+## Model policy
+
+Cortex chief and assignment coordinators run `gpt-6.1-sol` with reasoning effort `low`. Every delegated worker, including implementation, research, testing and review, uses `gpt-6-luna` with reasoning effort `max`. Pass both model and reasoning explicitly in the supported dispatch settings and verify the returned receipt. Do not inherit the coordinator model, lower reasoning, or substitute another model without explicit user approval. If unavailable, report that specific availability blocker; change the method or brief rather than escalating models automatically.
+
 ## Route the outcome
 
 Follow [clear task communication](references/communication.md) for assignments, changes, and results. Send concise, readable outcome briefs; keep history and accounting in the tracker. Follow-ups state only the relevant change and explicitly supersede conflicting instructions.
 
 Read [protocol.md](references/protocol.md) for identity, launch, and event handling. Resolve actual T3 identity and maintain atomic chief state at `~/.codex/cortex/chiefs/<actual-thread-id>/state.json`, preserving records and excluding secrets. Use [status reporting](references/status-reporting.md) for the sanitized projection.
 
-Create the separate assignment coordinator thread requested by this workflow using supported T3 binding. Include the user's actual task, ordered phases, acceptance criteria, authority, environment, deliverables, and chief return destination. Preserve phase order: do not turn a baseline/evaluate/fix/benchmark assignment into indefinite tuning of one example. Multiple coordinators are useful only for independently owned outcomes. Reuse the existing coordinator for continuation.
+Create the separate assignment coordinator thread requested by this workflow using supported T3 binding. Reconcile existing PRs/work first, then hand off the outcome, accessible starting pointers/dependencies, one owner with authority through requested delivery, finite acceptance checks, exclusions, and return condition. Preserve phase order: do not turn a baseline/evaluate/fix/benchmark assignment into indefinite tuning of one example. Multiple coordinators are useful only for independently owned outcomes. Reuse the existing coordinator for continuation.
 
-The coordinator owns how to delegate, integrate changes, run appropriate checks, correct failures, and produce evidence. Give it an outcome and known context, not a succession of tiny command approvals. Keep one technical owner responsible for a mutable runtime through its phase. Delegate parallel work only where ownership is independent.
+The coordinator owns how to delegate, integrate changes, run appropriate checks, correct failures, and produce evidence. Keep chief attention on outcomes and priority; do not administer commands, ordinary recovery, worker slots, or acknowledgment loops. Keep one technical owner responsible for a mutable runtime through its phase. Delegate parallel work only where ownership is independent.
 
 ## Supervise without becoming a relay loop
 
-Receive material progress, real blockers, and completed results. Do not require acknowledgments or forward every internal worker event to the user. A worker's completion is not assignment completion. Report progress as user outcomes: cases completed, measured behavior, remaining defects, and deliverable readiness.
+Receive material progress, real blockers, and completed results. Keep routine worker chatter, setup corrections, and resource handoff acknowledgments inside coordinator threads. Update the user for a meaningful outcome, a material change affecting their expectations, a decision they must make, or their explicit status request; do not echo every internal event. Do not require acknowledgments or forward every internal worker event to the user. A worker's completion is not assignment completion. Report progress as user outcomes: cases completed, measured behavior, remaining defects, and deliverable readiness.
 
 No default agent-hour allowances, mandatory renewal packets, or fixed repair/review counts apply. Coordinators continue authorized work autonomously. Use usage awareness to avoid duplicate effort, idle workers, repeated setup, unbounded retries, and oversized review panels. Keep accounting when useful or explicitly required, but do not turn it into a permission mechanism. Preserve existing task-specific hard limits and honest historical ledgers.
 
-When an approach repeatedly fails, require a concrete change in method, ownership, model suitability, or scope; do not rubber-stamp another nearly identical slice. The chief can redirect within existing task authority. Do not manufacture a user blocker from ordinary engineering work.
+When an approach repeatedly fails, require a concrete change in method, ownership, or scope; do not rubber-stamp another nearly identical slice. The chief can redirect within existing task authority. Do not manufacture a user blocker from ordinary engineering work.
 
 Use event-driven completion and the host's supported task controls. No polling loops, watchdog workers, or invented background services. Follow tool `next` instructions.
+
+## Keep verification subordinate to the requested outcome
+
+Prioritize the user’s requested product behavior and deliverable. Require proportionate evidence for affected behavior, not a general test-fixture cleanup project or exhaustive reconciliation of historical failures. Coordinators should repair only fixtures needed for essential affected verification or required repository checks, use reliable direct production-path evidence where permitted, and keep unrelated failures separate. Preserve required gates and honest reporting; faster delivery does not mean unverified correctness or weaker security checks.
 
 ## Return to the user
 
