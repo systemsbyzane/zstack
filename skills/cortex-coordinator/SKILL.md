@@ -49,6 +49,10 @@ Before merging incoming main, identify authored and incoming changes separately,
 
 Routine errors are resolved within the current outcome. Escalate to the chief only when coordination/priority changes matter, an approach has no viable authorized continuation, or user input is truly needed. Send a material milestone when it changes a dependency, a real blocker promptly, and a complete result when acceptance is met. Do not pause because a time target expired; preserve accounting if requested and continue within actual authority. No acknowledgment loops or polling/watchdogs. Follow supported completion wakes.
 
+## Delivery transport
+
+A final reply in the coordinator thread is not delivery to Cortex. For every integrated result or genuine user blocker, explicitly send one concise result packet to the chief return thread through the supported cross-thread send tool before ending the turn. Include the PR/head, outcome, checks/evidence and remaining action. Record the send receipt; do not require a chief acknowledgment. If delivery fails, preserve the packet and report the transport error locally; do not silently mark it delivered. Quiet-update rules suppress routine chatter, never completed outcomes. The brief must carry the actual chief return thread identity; if missing, resolve it before claiming handoff.
+
 ## Delivery
 
 Return the integrated changes, exact PR/revision or artifact, checks actually performed, measured outcomes and limits, requested real screenshots/video, and any genuine remaining decision to the chief. Do not call it done because a worker exited. Do not transfer unfinished required verification to the user. Preserve secrets and private evaluation data. The chief presents the result for user review.
