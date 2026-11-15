@@ -87,6 +87,7 @@ class MissionReportingTests(unittest.TestCase):
         self.assertIn("background:transparent", html)
         self.assertIn("@media(max-width:420px)", html)
         self.assertNotIn("<mission & evidence>", html)
+        self.assertNotIn('["', html)
 
 
 if __name__ == "__main__":

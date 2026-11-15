@@ -17,7 +17,9 @@ SPEC.loader.exec_module(GATE)
 def esc(value):
     if value is None:
         return "Not supplied"
-    if isinstance(value, (dict, list)):
+    if isinstance(value, list):
+        value = " · ".join(str(item) for item in value)
+    elif isinstance(value, dict):
         value = json.dumps(value, ensure_ascii=False, sort_keys=True)
     return html.escape(str(value))
 
