@@ -86,6 +86,19 @@ def read_projection(source, now=None):
     except (ValueError, TypeError, KeyError) as exc:
         return {"chief": {}, "generatedAt": None, "assignments": [],
                 "unknown_reason": f"Status projection invalid: {exc}"}
+    # Optional private-state enrichment is read-only and allowlisted. The
+    # sanitized projection remains authoritative for roster and status.
+    enrichment = {}
+    chief_summary = None
+    try:
+        state = json.loads((source_path.parent / "state.json").read_text(encoding="utf-8"))
+        if isinstance(state, dict) and state.get("chief") == data["chief"]:
+            chief_summary = state.get("chiefSummary") if isinstance(state.get("chiefSummary"), str) else None
+            for entry in state.get("assignments", []):
+                if isinstance(entry, dict) and isinstance(entry.get("assignmentId"), str):
+                    enrichment.setdefault(entry["assignmentId"], []).append(entry)
+    except (OSError, ValueError, TypeError):
+        pass
     result = []
     for item in data["assignments"]:
         age = None
@@ -95,6 +108,15 @@ def read_projection(source, now=None):
         stale_assignment = age is not None and (age > STALE_AFTER_HOURS * 3600 or age < 0)
         unknown = stale_projection or stale_assignment or item["status"] == "unknown" or item["lastReportedAt"] is None
         copy = dict(item)
+        matches = enrichment.get(item["assignmentId"], [])
+        if len(matches) == 1:
+            entry = matches[0]
+            for key in ("owner", "prUrl", "artifactUrl", "evidencePath"):
+                if isinstance(entry.get(key), str):
+                    copy[key] = entry[key]
+            verification = entry.get("verification")
+            if isinstance(verification, dict):
+                copy["verification"] = {k: verification[k] for k in ("verdict", "summary") if isinstance(verification.get(k), str)}
         if unknown:
             copy["display_status"] = "unknown"
             reasons = []
@@ -113,7 +135,7 @@ def read_projection(source, now=None):
                                        "done": "completed"}[item["status"]]
             copy["unknown_reason"] = None
         result.append(copy)
-    return {"chief": data["chief"], "generatedAt": data["generatedAt"], "assignments": result,
+    return {"chiefSummary": chief_summary, "chief": data["chief"], "generatedAt": data["generatedAt"], "assignments": result,
             "unknown_reason": "Projection is last-reported status, not proof of live execution."}
 
 
@@ -123,6 +145,16 @@ def assignment_card(item):
     fields = [("Owner", owner), ("Phase", esc(item.get("phase"))), ("Progress", esc(item.get("summary"))),
               ("Last reported", esc(item.get("lastReportedAt"))), ("Verification revision", esc(item.get("testedRevision"))),
               ("Review", esc(item.get("reviewState")))]
+    fields.append(("Recorded owner", esc(item.get("owner"))))
+    verification = item.get("verification", {})
+    fields.append(("Recorded verification", esc(verification.get("verdict", "Unknown — no verdict recorded"))))
+    if verification.get("summary"):
+        fields.append(("Verification detail", esc(verification["summary"])))
+    for key, label in (("prUrl", "Pull request"), ("artifactUrl", "Artifact"), ("evidencePath", "Evidence path")):
+        if item.get(key):
+            href = safe_href(item[key])
+            value = f'<a href="{esc(href)}" rel="noopener noreferrer">{esc(item[key])}</a>' if href else esc(item[key])
+            fields.append((label, value))
     if item.get("blocker"):
         fields.append(("Blocker", esc(item["blocker"])))
     if item.get("decisionNeeded"):
@@ -150,6 +182,7 @@ def render_status(projection):
             groups.append(f'<section><h1>{title}</h1>{"".join(assignment_card(item) for item in matching)}</section>')
     chief_link = safe_href(projection.get("chief", {}).get("link"))
     chief = f'<p class="muted">Chief: <a href="{html.escape(chief_link, quote=True)}" rel="noopener noreferrer">open thread</a></p>' if chief_link else ""
+    chief += f'<p>{esc(projection.get("chiefSummary", "Chief summary not recorded"))}</p>'
     generated = esc(projection.get("generatedAt"))
     return f'''<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
 :root{{color-scheme:light dark}}*{{box-sizing:border-box}}html,body{{margin:0;padding:0;background:transparent;color:var(--foreground);font-family:var(--font-sans,system-ui,sans-serif)}}

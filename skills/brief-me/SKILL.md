@@ -29,3 +29,12 @@ When native `html_preview` and `html_render` tools are available, preview the
 generated output at 728px and 360px, inspect both and render that same file.
 If unavailable, report that limitation and give the HTML path; do not claim a
 rendered preview.
+
+When a sibling private `state.json` exists with the same Chief identity, the
+adapter enriches only unique assignmentId matches with recorded owner,
+verification verdict/summary, prUrl, artifactUrl and evidencePath. It reads an
+optional chiefSummary string. No private fields beyond this allowlist render;
+projection roster/status stays authoritative. Missing verdict is Unknown,
+never inferred from a revision. Malformed state is ignored. Absolute evidence
+paths display as text; safe web/native links are clickable. Chief alone writes
+both files; the adapter never updates them. Legacy v1 projection is unchanged.

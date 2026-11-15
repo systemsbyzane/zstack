@@ -175,6 +175,24 @@ class ChiefBriefTests(unittest.TestCase):
             self.assertIn(value, page)
         self.assertIn("Status is last reported", page)
 
+    def test_private_state_enrichment_is_matched_escaped_and_optional(self):
+        projection = self.projection()
+        self.status.write_text(json.dumps(projection))
+        state = {"chief": projection["chief"], "chiefSummary": "<summary>", "assignments": [
+            {"assignmentId": "one", "owner": "<owner>", "prUrl": "https://example.org/pr/4",
+             "artifactUrl": "javascript:alert(1)", "verification": {"verdict": "FAIL", "summary": "<failed>"}},
+            {"assignmentId": "not-in-roster", "owner": "PRIVATE SECRET"}]}
+        (self.base / "state.json").write_text(json.dumps(state))
+        self.assertEqual(self.render().returncode, 0)
+        page = self.output.read_text()
+        for value in ("&lt;summary&gt;", "&lt;owner&gt;", "FAIL", "&lt;failed&gt;", 'href="https://example.org/pr/4"', "Unknown — no verdict recorded"):
+            self.assertIn(value, page)
+        self.assertNotIn('href="javascript:', page)
+        self.assertNotIn("PRIVATE SECRET", page)
+        (self.base / "state.json").write_text("malformed")
+        self.assertEqual(self.render().returncode, 0)
+        self.assertIn("Unknown — no verdict recorded", self.output.read_text())
+
     def test_adapter_fields_and_statuses_match_companion_schema(self):
         schema = json.loads((ROOT / "companion/status.schema.json").read_text(encoding="utf-8"))
         assignment = schema["properties"]["assignments"]["items"]
