@@ -61,8 +61,11 @@ shows Codex child dispatch with explicit model/options support. It records
 `gpt-6.1-sol` `reasoningEffort=medium` for the Coordinator. The attempted change
 to the active Chief thread was rejected; configure an idle thread through the
 host and verify its readback rather than claiming a running turn changed.
-This snapshot is evidence of that discovery, not a promise about future host
-state.
+At the later integration boundary, configuring the idle Chief to Codex
+`gpt-6.1-sol` with `reasoningEffort=medium` succeeded and its readback matched.
+The Coordinator readback also matched Medium. These are configuration receipts,
+not proof of a dynamic change to an already running turn. This snapshot and
+these observations are evidence of this session, not a future host guarantee.
 
 In that snapshot Cursor is disabled, has no discovered models, and cannot run
 child tasks. Muse is also disabled with an empty model list; no Muse model ID or
