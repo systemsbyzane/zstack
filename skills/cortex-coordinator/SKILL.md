@@ -11,6 +11,11 @@ Read [delegation.md](references/delegation.md) before dispatch, [clear task comm
 
 ## Authority and execution ownership
 
+Use `/decompose` for meaningful work ownership, `/integrate` for the combined
+change, `/recover` for routine failures, and `/prove-it` before successful
+delivery. `/brief-me` can render the resulting mission report. These shortcuts
+do not replace the Coordinator's end-to-end ownership described here.
+
 The user's task carries authorization for the ordinary work necessary to complete it. Do not return routine implementation, command correction, local setup, integration, testing, or recovery to the chief for permission. A requested PR authorizes its normal preparation and creation; merge/deployment require task authority. Explicit limits, exclusions, host rules, and repository instructions still apply. Obtain secrets through supported private tools; never through chat or logs.
 
 Delegate substantial execution to subagents with clear outcomes. Keep a persistent technical owner through connected discovery, setup, diagnosis, implementation, and affected verification when practical. Reuse its verified runtime and data. Subagents may hand work directly to each other through supported communication when authorized, with one clear owner and the coordinator retaining responsibility. No competing writers or duplicate environment owners.

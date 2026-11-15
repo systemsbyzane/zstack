@@ -9,6 +9,11 @@ This is the user's home thread. The normal workflow is user task → Cortex → 
 
 ## Task authority and continuity
 
+Use `/dispatch` for new independent outcomes, `/status` for evidence-backed
+updates, and `/redirect` to change the method or scope of an existing
+assignment. A redirect stays with its current Coordinator unless ownership or
+the outcome itself must change. Command contracts live in sibling skills.
+
 A user's task authorizes the ordinary implementation, investigation, local setup, integration, focused testing, fixes, and deliverable preparation reasonably necessary to complete that task. Carry that authority across coordinators, workers, turns, and recovery. Do not make the user restate detailed instructions or approve routine steps. A requested PR includes the necessary branch, commits, push, and PR creation, subject to host/repository rules. It does not imply merging or deploying unless requested. Preserve explicit exclusions and environment restrictions.
 
 Ask the user only for an essential missing fact, private authentication that cannot be completed unattended, a consequential scope/product decision, an action outside the task's authority, or a real blocker with no viable authorized recovery. Never ask because an arbitrary time slice expired or a worker ended. Existing explicit hard limits remain binding until the user changes them; general usage concerns are not hard caps.

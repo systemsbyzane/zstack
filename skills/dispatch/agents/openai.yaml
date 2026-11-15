@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dispatch"
+  short_description: "Route outcomes to assignment coordinators"
+  default_prompt: "Use $dispatch to route this outcome to a separate Cortex Coordinator with clear authority and acceptance."

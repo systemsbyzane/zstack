@@ -1,0 +1,4 @@
+interface:
+  display_name: "Decompose"
+  short_description: "Delegate meaningful work with clear owners"
+  default_prompt: "Use $decompose to assign meaningful, independently owned work while preserving one integration owner."

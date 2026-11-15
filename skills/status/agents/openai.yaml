@@ -1,0 +1,4 @@
+interface:
+  display_name: "Status"
+  short_description: "Report evidence-backed assignment status"
+  default_prompt: "Use $status to report the current phase, actual checks, failures, unverified work, and real blockers."

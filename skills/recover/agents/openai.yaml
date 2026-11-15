@@ -1,0 +1,4 @@
+interface:
+  display_name: "Recover"
+  short_description: "Resolve routine failures within assignment authority"
+  default_prompt: "Use $recover to diagnose and correct this failure while keeping the current owner and rerunning affected checks."

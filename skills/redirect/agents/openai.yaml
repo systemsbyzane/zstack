@@ -1,0 +1,4 @@
+interface:
+  display_name: "Redirect"
+  short_description: "Change the method on the active assignment"
+  default_prompt: "Use $redirect to send the active Coordinator a concise correction while preserving the original goal and acceptance."
