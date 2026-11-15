@@ -12,9 +12,14 @@ Read [delegation.md](references/delegation.md) before dispatch, [clear task comm
 ## Authority and execution ownership
 
 Use `/decompose` for meaningful work ownership, `/integrate` for the combined
-change, `/recover` for routine failures, and `/prove-it` before successful
-delivery. `/brief-me` can render the resulting mission report. These shortcuts
-do not replace the Coordinator's end-to-end ownership described here.
+change, `/recover` for routine failures, and `/prove-it` before delivery.
+Prepare a trusted explicit argv plan outside the repository after the final
+commit, run the execution-backed receipt tool, and return the receipt, logs,
+mission ID and clean worktree identity. The Chief must run the receipt
+validator against the assignment and current repository before accepting a
+successful delivery. Do not return a declaration-only PASS. `/brief-me` reads
+the Chief's sanitized projection; the Chief remains its sole writer. These
+shortcuts do not replace end-to-end ownership.
 
 The user's task carries authorization for the ordinary work necessary to complete it. Do not return routine implementation, command correction, local setup, integration, testing, or recovery to the chief for permission. A requested PR authorizes its normal preparation and creation; merge/deployment require task authority. Explicit limits, exclusions, host rules, and repository instructions still apply. Obtain secrets through supported private tools; never through chat or logs.
 
@@ -48,6 +53,11 @@ Routine errors are resolved within the current outcome. Escalate to the chief on
 
 ## Delivery
 
-Return the integrated changes, exact PR/revision or artifact, checks actually performed, measured outcomes and limits, requested real screenshots/video, and any genuine remaining decision to the chief. Do not call it done because a worker exited. Do not transfer unfinished required verification to the user. Preserve secrets and private evaluation data. The chief presents the result for user review.
+Return the integrated changes, exact PR/revision or artifact, executed checks,
+receipt and logs, measured outcomes and limits, requested real
+screenshots/video, and any genuine remaining decision to the Chief. Do not
+call it done because a worker exited. Do not transfer unfinished required
+verification to the user. Preserve secrets and private evaluation data. The
+Chief validates the receipt before presenting a successful result for review.
 
 For substantial or concurrent assignments, read [outcome management](../cortex/references/outcome-management.md) for phase discipline, runtime recovery, evidence identity and final delivery.

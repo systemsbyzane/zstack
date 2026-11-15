@@ -1,197 +1,177 @@
 #!/usr/bin/env python3
-"""Render a self-contained HTML brief from a mission report JSON file."""
+"""Render a read-only brief from the Chief's sanitized status projection."""
 
 import argparse
 import html
-import importlib.util
 import json
+import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 
-GATE_PATH = Path(__file__).resolve().parents[2] / "prove-it" / "scripts" / "prove_it.py"
-SPEC = importlib.util.spec_from_file_location("prove_it", GATE_PATH)
-GATE = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(GATE)
+STALE_AFTER_HOURS = 24
+STATUSES = {"needs-you", "blocked", "ready-for-review", "working", "done", "unknown"}
+REVIEW_STATES = {"not-requested", "pending", "handled"}
+REQUIRED = {"assignmentId", "title", "status", "phase", "summary", "lastReportedAt",
+            "coordinatorLink", "blocker", "decisionNeeded", "testedRevision", "reviewState"}
 
 
 def esc(value):
-    if value is None:
-        return "Not supplied"
-    if isinstance(value, list):
-        value = " · ".join(str(item) for item in value)
-    elif isinstance(value, dict):
-        value = json.dumps(value, ensure_ascii=False, sort_keys=True)
-    return html.escape(str(value))
-
-
-def card(title, body):
-    return f'<section class="card"><h2>{esc(title)}</h2>{body}</section>'
-
-
-def records(items, columns, empty_text):
-    if not isinstance(items, list):
-        return f'<p class="muted">{esc(empty_text)}</p>'
-    if not items:
-        return f'<p class="muted">{esc(empty_text)}</p>'
-    rows = []
-    for item in items:
-        if not isinstance(item, dict):
-            rows.append(f"<li>{esc(item)}</li>")
-            continue
-        values = "".join(f"<dt>{esc(label)}</dt><dd>{esc(item.get(key))}</dd>" for key, label in columns)
-        rows.append(f'<li><dl>{values}</dl></li>')
-    return "<ul class='records'>" + "".join(rows) + "</ul>"
-
-
-def strings(items, missing):
-    if not isinstance(items, list):
-        return f'<p class="muted">{esc(missing)}</p>'
-    if not items:
-        return '<p class="muted">None recorded</p>'
-    return "<ul>" + "".join(f"<li>{esc(item)}</li>" for item in items) + "</ul>"
+    return html.escape("Not supplied" if value is None else str(value))
 
 
 def safe_href(value):
-    """Allow web links and simple relative artifact links, never active schemes."""
-    if not isinstance(value, str) or not value.strip():
-        return None
-    value = value.strip()
-    if any(ord(char) < 32 for char in value) or "\\" in value:
+    if not isinstance(value, str) or not value.strip() or any(ord(c) < 32 for c in value) or "\\" in value:
         return None
     try:
-        parts = urlsplit(value)
+        parts = urlsplit(value.strip())
     except ValueError:
         return None
     if parts.scheme:
         return value if parts.scheme.lower() in ("http", "https") and parts.netloc else None
-    if parts.netloc or value.startswith("/") or value.startswith("//"):
-        return None
-    decoded_path = unquote(parts.path)
-    if "\\" in decoded_path or any(part == ".." for part in decoded_path.split("/")):
+    decoded = unquote(parts.path)
+    if parts.netloc or value.startswith(("/", "//")) or "\\" in decoded or ".." in decoded.split("/"):
         return None
     return value
 
 
-def link(value, default_label):
-    if isinstance(value, dict):
-        href = safe_href(value.get("url"))
-        label = value.get("label") or value.get("url") or default_label
-    else:
-        href = safe_href(value)
-        label = value or default_label
-    if not href:
-        return esc(value if value is not None else "Not supplied")
-    return f'<a href="{esc(href)}" rel="noopener noreferrer">{esc(label)}</a>'
+def parse_time(value):
+    if not isinstance(value, str):
+        raise ValueError("timestamp must be an ISO date-time string")
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        raise ValueError("timestamp must include a timezone")
+    return parsed.astimezone(timezone.utc)
 
 
-def portfolio_mission(item):
-    if not isinstance(item, dict):
-        return f"<li>{esc(item)}</li>"
-    name = item.get("name", item.get("mission_id"))
-    fields = (("status", "Status"), ("progress", "Progress"), ("verification", "Verification"))
-    rows = "".join(f"<dt>{label}</dt><dd>{esc(item.get(key))}</dd>" for key, label in fields if key in item)
-    links = []
-    for key, label in (("pr_url", "Pull request"), ("pr", "Pull request"),
-                       ("artifact_url", "Artifact"), ("artifact", "Artifact")):
-        if key in item and item[key] is not None:
-            links.append(f"<dt>{label}</dt><dd>{link(item[key], label)}</dd>")
-    if rows or links:
-        rows = f"<dt>Mission</dt><dd>{esc(name)}</dd>" + rows + "".join(links)
-        details = f"<dl>{rows}</dl>"
-    else:
-        details = f"<p>{esc(name)}</p>"
-    return f"<li>{details}</li>"
+def read_projection(source, now=None):
+    """Return assignments with explicit unknown state for invalid/missing/stale data."""
+    now = now or datetime.now(timezone.utc)
+    source_path = Path(source).expanduser()
+    if source_path.is_dir():
+        source_path = source_path / "status.json"
+    try:
+        data = json.loads(source_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {"chief": {}, "generatedAt": None, "assignments": [],
+                "unknown_reason": f"Status projection missing: {source_path}"}
+    except (OSError, json.JSONDecodeError) as exc:
+        return {"chief": {}, "generatedAt": None, "assignments": [],
+                "unknown_reason": f"Status projection unreadable or malformed: {exc}"}
+    try:
+        if not isinstance(data, dict) or set(data) != {"schemaVersion", "generatedAt", "chief", "assignments"}:
+            raise ValueError("projection must match the documented v1 top-level fields")
+        if data["schemaVersion"] != 1 or not isinstance(data["chief"], dict) or set(data["chief"]) != {"link"}:
+            raise ValueError("projection schema version or chief fields are invalid")
+        generated = parse_time(data["generatedAt"])
+        if not isinstance(data["chief"]["link"], str):
+            raise ValueError("chief.link must be a string")
+        if not isinstance(data["assignments"], list):
+            raise ValueError("assignments must be an array")
+        for assignment in data["assignments"]:
+            if not isinstance(assignment, dict) or set(assignment) != REQUIRED:
+                raise ValueError("an assignment does not match the documented v1 fields")
+            for key in ("assignmentId", "title", "phase", "summary"):
+                if not isinstance(assignment[key], str):
+                    raise ValueError(f"assignment {key} must be a string")
+            if assignment["status"] not in STATUSES or assignment["reviewState"] not in REVIEW_STATES:
+                raise ValueError("assignment status or reviewState is invalid")
+            for key in ("lastReportedAt", "coordinatorLink", "blocker", "decisionNeeded", "testedRevision"):
+                if assignment[key] is not None and not isinstance(assignment[key], str):
+                    raise ValueError(f"assignment {key} must be a string or null")
+            if assignment["lastReportedAt"] is not None:
+                parse_time(assignment["lastReportedAt"])
+        stale_projection = (now.astimezone(timezone.utc) - generated).total_seconds() > STALE_AFTER_HOURS * 3600 or generated > now
+    except (ValueError, TypeError, KeyError) as exc:
+        return {"chief": {}, "generatedAt": None, "assignments": [],
+                "unknown_reason": f"Status projection invalid: {exc}"}
+    result = []
+    for item in data["assignments"]:
+        age = None
+        if item["lastReportedAt"]:
+            last = parse_time(item["lastReportedAt"])
+            age = (now.astimezone(timezone.utc) - last).total_seconds()
+        stale_assignment = age is not None and (age > STALE_AFTER_HOURS * 3600 or age < 0)
+        unknown = stale_projection or stale_assignment or item["status"] == "unknown" or item["lastReportedAt"] is None
+        copy = dict(item)
+        if unknown:
+            copy["display_status"] = "unknown"
+            reasons = []
+            if stale_projection:
+                reasons.append("projection is older than 24 hours or timestamp is in the future")
+            if stale_assignment:
+                reasons.append("last report is older than 24 hours or in the future")
+            if item["lastReportedAt"] is None:
+                reasons.append("last report time is unknown")
+            if item["status"] == "unknown":
+                reasons.append("Chief reported unknown status")
+            copy["unknown_reason"] = "; ".join(reasons)
+        else:
+            copy["display_status"] = {"working": "active", "ready-for-review": "review-ready",
+                                       "blocked": "blocked", "needs-you": "blocked",
+                                       "done": "completed"}[item["status"]]
+            copy["unknown_reason"] = None
+        result.append(copy)
+    return {"chief": data["chief"], "generatedAt": data["generatedAt"], "assignments": result,
+            "unknown_reason": "Projection is last-reported status, not proof of live execution."}
 
 
-def render_portfolio(data):
-    portfolio = data.get("portfolio") if isinstance(data.get("portfolio"), dict) else data
-    missions = portfolio.get("missions")
-    missions = missions if isinstance(missions, list) else []
-    summary = f"<p>{esc(portfolio.get('chief_summary'))}</p>" if portfolio.get("chief_summary") else ""
-    sections = []
-    groups = (("active", {"active", "in progress", "in-progress"}),
-              ("review-ready", {"review-ready", "review ready", "ready for review"}),
-              ("attention", {"attention", "blocked", "at risk", "failed"}))
-    assigned = set()
-    for title, statuses in groups:
-        matching = [m for m in missions if isinstance(m, dict) and str(m.get("status", "")).strip().lower() in statuses]
-        assigned.update(id(m) for m in matching)
+def assignment_card(item):
+    link = safe_href(item.get("coordinatorLink"))
+    owner = f'<a href="{html.escape(link, quote=True)}" rel="noopener noreferrer">Coordinator thread</a>' if link else "Coordinator link unavailable"
+    fields = [("Owner", owner), ("Phase", esc(item.get("phase"))), ("Progress", esc(item.get("summary"))),
+              ("Last reported", esc(item.get("lastReportedAt"))), ("Verification revision", esc(item.get("testedRevision"))),
+              ("Review", esc(item.get("reviewState")))]
+    if item.get("blocker"):
+        fields.append(("Blocker", esc(item["blocker"])))
+    if item.get("decisionNeeded"):
+        fields.append(("Decision needed", esc(item["decisionNeeded"])))
+    if item.get("unknown_reason"):
+        fields.append(("Status detail", esc(item["unknown_reason"])))
+    rows = "".join(f"<dt>{label}</dt><dd>{value}</dd>" for label, value in fields)
+    status = item.get("display_status", "unknown")
+    return f'<article class="card"><div class="title"><h2>{esc(item.get("title"))}</h2><span class="badge">{esc(status)}</span></div><p class="muted">Assignment {esc(item.get("assignmentId"))}</p><dl>{rows}</dl></article>'
+
+
+def render_status(projection):
+    order = ("active", "review-ready", "blocked", "completed", "unknown")
+    groups = []
+    assignments = projection["assignments"]
+    if projection.get("unknown_reason") and not assignments:
+        assignments = [{"assignmentId": "unknown", "title": "Assignment status unavailable",
+                        "display_status": "unknown", "phase": "Unknown", "summary": projection["unknown_reason"],
+                        "lastReportedAt": None, "testedRevision": None, "reviewState": "not-requested",
+                        "unknown_reason": "No current authoritative status could be read."}]
+    for status in order:
+        matching = [item for item in assignments if item.get("display_status") == status]
         if matching:
-            sections.append(card(title.title(), "<ul class='records'>" + "".join(portfolio_mission(m) for m in matching) + "</ul>"))
-    other = [m for m in missions if id(m) not in assigned]
-    if other:
-        sections.append(card("Other missions", "<ul class='records'>" + "".join(portfolio_mission(m) for m in other) + "</ul>"))
-    if not sections:
-        sections.append(card("Missions", '<p class="muted">No missions supplied</p>'))
-    return f'''<!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-:root{{color-scheme:light dark}}*{{box-sizing:border-box}}
-html,body{{margin:0;padding:0;background:transparent;color:var(--foreground);font-family:var(--font-sans,system-ui,sans-serif)}}
-main{{width:100%;max-width:100%;display:grid;gap:12px}}h1{{font-size:1.35rem;margin:0}}h2{{font-size:1rem;margin:0 0 12px}}
-p{{margin:0;overflow-wrap:anywhere}}.muted{{color:var(--muted-foreground,var(--muted))}}
-.card{{padding:16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);color:var(--card-foreground,var(--foreground));min-width:0}}
-ul{{margin:0;padding-left:20px}}li+li{{margin-top:10px}}.records{{list-style:none;padding:0}}
-dl{{display:grid;grid-template-columns:minmax(95px,140px) minmax(0,1fr);gap:4px 10px;margin:0}}dt{{color:var(--muted-foreground,var(--muted));font-size:.85rem}}dd{{margin:0;overflow-wrap:anywhere}}
-a{{color:var(--link,var(--primary));overflow-wrap:anywhere}}@media(max-width:420px){{dl{{grid-template-columns:1fr;gap:2px}}}}
-</style></head><body><main><h1>Mission portfolio</h1>{summary}{''.join(sections)}</main></body></html>'''
-
-
-def render(data):
-    if isinstance(data, dict) and ("portfolio" in data or "missions" in data):
-        return render_portfolio(data)
-    gate = GATE.evaluate(data)
-    source = gate["source"] if isinstance(gate["source"], dict) else {}
-    verdict = gate["verdict"]
-    verdict_class = {"PASS": "pass", "FAIL": "fail", "INSUFFICIENT EVIDENCE": "unknown"}[verdict]
-    identity = " · ".join(esc(source.get(key)) for key in ("repository", "branch", "revision"))
-    check_rows = records(gate["checks"], (("name", "Check"), ("command", "Command"), ("status", "Result"), ("evidence", "Evidence")), "No checks recorded")
-    acceptance_rows = records(gate["original_acceptance"], (("id", "ID"), ("requirement", "Original acceptance"), ("status", "Status"), ("evidence", "Evidence")), "No original acceptance items recorded")
-    issue_list = strings(gate["issues"], "No gate issues")
-    failure_list = strings(gate["failures"], "No failures recorded")
-    unverified_list = strings(gate["unverified"], "No unverified items recorded")
-    return f'''<!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-:root{{color-scheme:light dark}}
-*{{box-sizing:border-box}}
-html,body{{margin:0;padding:0;background:transparent;color:var(--foreground);font-family:var(--font-sans,system-ui,sans-serif)}}
-main{{width:100%;max-width:100%;display:grid;gap:12px}}
-h1{{font-size:1.35rem;line-height:1.25;margin:0 0 4px}}h2{{font-size:1rem;margin:0 0 12px}}
-p{{margin:0;overflow-wrap:anywhere}}.muted{{color:var(--muted-foreground,var(--muted))}}
-.summary{{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}}
-.badge{{display:inline-block;padding:6px 10px;border-radius:var(--radius);font-weight:700;background:var(--secondary);color:var(--secondary-foreground,var(--foreground))}}
-.badge.pass{{background:var(--success-surface,var(--secondary));color:var(--success-foreground,var(--foreground))}}
-.badge.fail{{background:var(--destructive-surface,var(--secondary));color:var(--destructive-foreground,var(--foreground))}}
-.badge.unknown{{background:var(--warning-surface,var(--secondary));color:var(--warning-foreground,var(--foreground))}}
-.card{{padding:16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);color:var(--card-foreground,var(--foreground));min-width:0}}
-code{{font-family:var(--font-mono,monospace);overflow-wrap:anywhere}}.identity{{font-size:.9rem;color:var(--muted-foreground,var(--muted));overflow-wrap:anywhere}}
-ul{{margin:0;padding-left:20px}}li+li{{margin-top:10px}}.records{{list-style:none;padding:0}}
-dl{{display:grid;grid-template-columns:minmax(95px,140px) minmax(0,1fr);gap:4px 10px;margin:0}}
-dt{{color:var(--muted-foreground,var(--muted));font-size:.85rem}}dd{{margin:0;overflow-wrap:anywhere}}
-@media(max-width:420px){{dl{{grid-template-columns:1fr;gap:2px}}dd+dt{{margin-top:8px}}.summary{{align-items:flex-start;flex-direction:column}}}}
-</style></head><body><main>
-<section><div class="summary"><h1>Mission brief</h1><span class="badge {verdict_class}">{esc(verdict)}</span></div>
-<p><strong>{esc(gate['mission_id'])}</strong></p><p class="identity">{identity}</p>
-<p class="identity">Tested revision: <code>{esc(gate['tested_revision'])}</code></p></section>
-{card('Original acceptance', acceptance_rows)}
-{card('Actual checks', check_rows)}
-{card('Failures', failure_list)}
-{card('Unverified', unverified_list)}
-{card('Gate issues', issue_list)}
-</main></body></html>'''
+            title = status.title().replace("-", " ")
+            groups.append(f'<section><h1>{title}</h1>{"".join(assignment_card(item) for item in matching)}</section>')
+    chief_link = safe_href(projection.get("chief", {}).get("link"))
+    chief = f'<p class="muted">Chief: <a href="{html.escape(chief_link, quote=True)}" rel="noopener noreferrer">open thread</a></p>' if chief_link else ""
+    generated = esc(projection.get("generatedAt"))
+    return f'''<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+:root{{color-scheme:light dark}}*{{box-sizing:border-box}}html,body{{margin:0;padding:0;background:transparent;color:var(--foreground);font-family:var(--font-sans,system-ui,sans-serif)}}
+main{{width:100%;max-width:100%;display:grid;gap:14px}}h1{{font-size:1.05rem;margin:0 0 8px}}h2{{font-size:1rem;margin:0}}p{{margin:0;overflow-wrap:anywhere}}.muted{{color:var(--muted-foreground,var(--muted));font-size:.9rem}}
+.card{{padding:14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);color:var(--card-foreground,var(--foreground));min-width:0;margin:8px 0}}.title{{display:flex;gap:10px;justify-content:space-between;align-items:center}}.badge{{font-weight:700;padding:4px 8px;border-radius:var(--radius);background:var(--secondary);white-space:nowrap}}
+dl{{display:grid;grid-template-columns:minmax(110px,145px) minmax(0,1fr);gap:5px 10px;margin:12px 0 0}}dt{{font-size:.85rem;color:var(--muted-foreground,var(--muted))}}dd{{margin:0;overflow-wrap:anywhere}}a{{color:var(--link,var(--primary));overflow-wrap:anywhere}}@media(max-width:420px){{dl{{grid-template-columns:1fr;gap:2px}}dd+dt{{margin-top:8px}}.title{{align-items:flex-start;flex-direction:column}}}}
+</style></head><body><main><section><h1>Chief assignment brief</h1>{chief}<p class="muted">Projection generated: {generated}. Status is last reported, not proof of live execution. Data older than 24 hours is shown as unknown.</p></section>{''.join(groups)}</main></body></html>'''
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("report", type=Path, help="mission report JSON")
-    parser.add_argument("--output", "-o", type=Path, required=True, help="output HTML path")
+    parser.add_argument("source", type=Path, help="Chief directory or its sanitized status.json projection")
+    parser.add_argument("--output", "-o", type=Path, required=True)
     args = parser.parse_args(argv)
-    data = json.loads(args.report.read_text(encoding="utf-8"))
-    args.output.write_text(render(data), encoding="utf-8")
+    projection = read_projection(args.source)
+    args.output.write_text(render_status(projection), encoding="utf-8")
+    print(json.dumps({"assignments": len(projection["assignments"]),
+                      "unknown": bool(projection.get("unknown_reason") and not projection["assignments"]),
+                      "source": str(args.source)}, ensure_ascii=False))
     return 0
 
 
 if __name__ == "__main__":
+    sys.dont_write_bytecode = True
     raise SystemExit(main())

@@ -1,95 +1,121 @@
 # zstack
 
-Personal T3 Cortex orchestration skills. The Chief owns routing and user
-communication; each Coordinator owns an assignment through delegation,
-integration, recovery, and evidence-backed delivery. Council remains an
-optional independent review skill.
+Personal T3 Cortex orchestration skills. The Chief owns routing, the durable
+tracker and user communication. Each Coordinator owns an assignment through
+delegation, integration, recovery and verification. Council remains optional.
 
 ## Install
 
-Copy the complete `skills` directory so each skill keeps its executable and
-reference files:
+Copy the complete skills directory so each skill keeps its references and
+executables:
 
 ```sh
 mkdir -p ~/.codex/skills
 cp -R skills/* ~/.codex/skills/
 ```
 
-Start a new T3 thread and send:
-
-```text
-$cortex
-Bootstrap this thread as my chief of staff.
-```
-
-Pin that thread manually. Runtime state, credentials, and project artifacts
-are not included. Skills guide agent behavior; they are not a background
-service or enforced runtime limits. Local paths in the contracts reflect the
-original installation and should be adapted on another machine.
+Start a new T3 thread and send `$cortex` to bootstrap it as Chief. Pin that
+thread manually. Runtime state, credentials and project artifacts are not
+included. Skills are instructions and local commands; they are not a host
+policy hook, background service or enforced runtime boundary. Available host
+tools do not expose an interception/delivery hook that can force every Chief
+or Coordinator to follow these instructions. A Chief must validate receipts
+before accepting a delivery, but instruction compliance cannot be guaranteed
+by this repository.
 
 ## Commands
 
-- `/dispatch` — Chief routes an outcome to a separate Coordinator thread.
-- `/decompose` — Coordinator breaks an assignment into owned, meaningful work.
-- `/integrate` — Coordinator integrates changes and runs affected checks.
-- `/prove-it` — require an exact-identity evidence gate before successful delivery.
-- `/brief-me` — render a concise HTML brief from a mission report's real data.
-- `/recover` — resolve routine execution failures while preserving ownership.
-- `/status` — report evidence-backed assignment status.
-- `/redirect` — change the current Coordinator's approach without creating a new assignment.
-- `/council` — optional independent review (existing Council skill).
+- `/dispatch` — Chief routes an outcome to a separate Coordinator.
+- `/decompose` and `/integrate` — Coordinator plans meaningful ownership and
+  integrates and verifies the result.
+- `/prove-it` — execute explicitly trusted local checks and validate a
+  source-bound receipt.
+- `/brief-me` — render a read-only HTML brief from the Chief's sanitized
+  `status.json` projection.
+- `/recover`, `/status` and `/redirect` — recover, report and redirect while
+  preserving ownership.
+- `/council` — optional independent review skill.
 
-`prove-it` exits 0 only for `PASS`, 1 for `FAIL`, and 2 for
-`INSUFFICIENT EVIDENCE`. See [the mission report format](skills/prove-it/references/mission-report.md)
-and [the brief renderer](skills/brief-me/SKILL.md).
+## Execution receipts
 
-## Evidence and acceptance
-
-Run the executable production-path gate tests with:
+The runner executes only the explicit argv arrays in a trusted local plan.
+It never executes commands found in mission reports or receipts. Plans,
+manual evidence, logs and receipts must be kept outside the repository, and
+the worktree must be clean before and after execution. Run it after the final
+source commit:
 
 ```sh
-python3 -m unittest discover -s tests -v
+python3 /path/to/skills/prove-it/scripts/prove_it.py run \
+  /tmp/assignment-plan.json --repo /path/to/repository \
+  --receipt /tmp/assignment-receipt.json \
+  --logs /tmp/assignment-logs
 ```
 
-These tests use labelled synthetic reports to demonstrate: complete matching
-identity and evidence passes; a revision mismatch or failed check fails; and
-missing or unverified evidence is insufficient. They also invoke the actual
-`prove_it.py` and `brief_me.py` entry points and check escaping, theme styling,
-transparency, and the narrow-screen layout. They do not prove that a live T3
-Chief can create threads, that Coordinators can delegate or recover work, or
-that a report's declared evidence is truthful.
+The plan is JSON with `schema_version: 1`, a `mission_id`, acceptance items,
+and checks. Each check has an `id`, `name`, an `argv` string array, and the
+acceptance IDs it verifies. The runner uses no shell and captures exit code,
+stdout, stderr and SHA-256 log references. Optional manual observations are
+provided separately with `--manual-evidence /tmp/manual-evidence.json`; each
+entry has `acceptance_id`, `observed_by` and `observation`. They are recorded
+as self-reported observations, not authenticated facts.
 
-## Acceptance coverage correction
+The Chief validates the receipt against the assignment and current repository
+state. Run from a context that can read the receipt and the repository:
 
-The earlier focused-v2 report did not state the requirement to show multiple
-independent missions in a chief portfolio, and its redirect coverage was a
-written contract rather than a live redirect demonstration. The renderer now
-has targeted tests for separately rendered active, review-ready, and attention
-missions, including link safety. A contract test checks that `/redirect`
-retains the active assignment. Live T3 routing and redirect behavior remain
-unverified; the earlier report's evidence revision remains historical and is
-not the revision of this correction.
+```sh
+python3 /path/to/skills/prove-it/scripts/prove_it.py validate \
+  /tmp/assignment-receipt.json --mission assignment-42 \
+  --repo /path/to/repository
+```
 
-For an assignment, preserve its original acceptance in the report, record the
-exact tested commit and actual command output, and run `prove_it.py` against
-that report. Only `PASS` allows successful delivery. To demonstrate an HTML
-brief, generate it from that same report, inspect native previews at 728px and
-360px when those host tools are available, and render it with the host's
-`html_render`; record tool errors or unavailable live behaviors as unverified.
+Exit codes are 0 for `PASS`, 1 for `FAIL`, and 2 for `INSUFFICIENT EVIDENCE`.
+Validation checks mission ID, Git repository/worktree/revision, clean tracked
+and untracked state, executed check records and log digests. Any source edit,
+new untracked path or revision change invalidates the receipt. This is not a
+signature or cryptographic provenance system; a user who can alter the
+receipt and logs can fabricate them. The check runner and receipts provide
+reproducible execution records and live source matching, not host-enforced
+policy or cryptographic attestation.
 
-## Supervision
+## Chief status brief
 
-Coordinators check in with the chief on material progress, blockers and work
-boundaries. The chief evaluates evidence and alignment with the assigned goal,
-then continues, redirects or stops work within the user's existing authority.
-Time and retry thresholds trigger chief review, not repeated user approval.
-The user receives completed results or decisions that need their authority or
-judgment. Check-ins are event-driven; there is no background polling service.
+`/brief-me` reads a Chief directory or its sanitized `status.json` projection
+using the documented v1 schema in `skills/cortex/references/status-reporting.md`
+and `companion/status.schema.json`:
 
-## License
+```sh
+python3 /path/to/skills/brief-me/scripts/brief_me.py \
+  ~/.codex/cortex/chiefs/<actual-chief-thread-id> \
+  --output /tmp/chief-brief.html
+```
 
-MIT. Council includes adaptations of tstack; its original notice is preserved in `skills/council/references/upstream.md`.
+This is read-only. Chief remains the sole writer of `state.json` and
+`status.json`. Missing, malformed or older-than-24-hour status is shown as
+unknown. Status is last-reported projection data, not proof of live execution.
+
+## Verification and native smoke
+
+Run the production-path tests after committing the source under test; the
+environment flag prevents Python bytecode artifacts in the repository:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
+```
+
+They exercise the actual runner, validator and brief CLI using isolated Git
+fixtures. The live T3 lifecycle is not represented by those fixtures. Follow
+[the native smoke procedure](docs/native-smoke.md) to verify worker return,
+integration, fail/fix/reverify, same-Coordinator redirect, two Chief-tracked
+missions and brief-to-tracker agreement in the real host. Keep mocked tests
+and live results separate. Prior mission reports in `artifacts/` are
+historical snapshots and do not prove the current revision or live behavior.
 
 ## Companion app
 
-Experimental lightweight status board and Mac launcher source: [companion](companion/README.md). Local configuration required; no runtime state or credentials included.
+The experimental companion sources remain under [companion](companion/README.md).
+They are not required by the skills or the status brief.
+
+## License
+
+MIT. Council includes adaptations of tstack; its original notice is preserved
+in `skills/council/references/upstream.md`.

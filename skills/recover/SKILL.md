@@ -13,4 +13,5 @@ meaningful correction; record the failure and rerun affected verification.
 If the same approach fails again, change the method or capability. Escalate
 only for a genuine missing decision, authority, authentication, or blocker with
 no viable authorized path. Do not poll, create watchdogs, or ask for routine
-approval. Update the mission report honestly and finish with `/prove-it`.
+approval. Preserve failed outcomes, rerun affected checks, then generate a new
+execution receipt on the final clean revision with `/prove-it`.

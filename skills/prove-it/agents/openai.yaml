@@ -1,4 +1,4 @@
 interface:
   display_name: "Prove It"
   short_description: "Gate delivery on exact identity and evidence"
-  default_prompt: "Use $prove-it to evaluate this mission report; failed or missing verification must block successful delivery."
+  default_prompt: "Run trusted local checks and generate a source-bound receipt; require Chief validation before successful delivery."

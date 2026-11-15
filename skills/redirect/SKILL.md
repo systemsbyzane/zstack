@@ -14,4 +14,5 @@ for an ordinary method change.
 
 Change ownership only when the assignment outcome or a consequential
 coordination boundary changes. Preserve failures and prior evidence, then
-require affected verification and `/prove-it` on the integrated revision.
+require affected verification and a fresh execution receipt on the integrated
+revision. The Chief validates that receipt against the live clean worktree.
