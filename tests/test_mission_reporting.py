@@ -96,7 +96,7 @@ class MissionReportingTests(unittest.TestCase):
                 "missions": [
                     {"name": "API", "status": "active", "progress": "Endpoint implemented", "verification": "Tests pending", "pr_url": "https://github.com/example/repo/pull/7"},
                     {"name": "Docs", "status": "review-ready", "progress": "Guide updated", "verification": "Passed", "artifact_url": "artifacts/guide.html"},
-                    {"name": "Deploy", "status": "attention", "progress": "Blocked on observed issue", "verification": "Failed", "pr_url": "javascript:alert(1)"},
+                    {"name": "Deploy", "status": "attention", "progress": "Blocked on observed issue", "verification": "Failed", "pr_url": "javascript:alert(1)", "artifact_url": "%2e%2e/private.txt"},
                 ],
             }
         }
@@ -114,6 +114,7 @@ class MissionReportingTests(unittest.TestCase):
         self.assertIn('href="https://github.com/example/repo/pull/7"', page)
         self.assertIn('href="artifacts/guide.html"', page)
         self.assertNotIn('href="javascript:', page)
+        self.assertNotIn('href="%2e%2e/private.txt"', page)
 
     def test_redirect_contract_preserves_the_active_assignment(self):
         contract = (ROOT / "skills/redirect/SKILL.md").read_text(encoding="utf-8")

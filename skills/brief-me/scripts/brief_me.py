@@ -6,7 +6,7 @@ import html
 import importlib.util
 import json
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 
 GATE_PATH = Path(__file__).resolve().parents[2] / "prove-it" / "scripts" / "prove_it.py"
@@ -59,12 +59,16 @@ def safe_href(value):
     value = value.strip()
     if any(ord(char) < 32 for char in value) or "\\" in value:
         return None
-    parts = urlsplit(value)
+    try:
+        parts = urlsplit(value)
+    except ValueError:
+        return None
     if parts.scheme:
         return value if parts.scheme.lower() in ("http", "https") and parts.netloc else None
     if parts.netloc or value.startswith("/") or value.startswith("//"):
         return None
-    if any(part == ".." for part in parts.path.split("/")):
+    decoded_path = unquote(parts.path)
+    if "\\" in decoded_path or any(part == ".." for part in decoded_path.split("/")):
         return None
     return value
 
