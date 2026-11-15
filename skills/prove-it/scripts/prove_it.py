@@ -11,6 +11,8 @@ import hashlib
 import json
 import os
 import re
+import math
+import signal
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -91,6 +93,10 @@ def _valid_plan(plan):
             raise ValueError(f"check {check['id']} cwd must be a relative path")
         if Path(cwd).is_absolute() or ".." in Path(cwd).parts:
             raise ValueError(f"check {check['id']} cwd must stay inside the worktree")
+    for check in checks:
+        timeout = check.get("timeout_seconds", 60)
+        if type(timeout) not in (int, float) or not math.isfinite(timeout) or not 0 < timeout <= 300:
+            raise ValueError("timeout_seconds must be finite, positive and at most 300")
     return mission, acceptance, checks
 
 
@@ -145,18 +151,26 @@ def run_plan(plan_path, repo_path, receipt_path, logs_path, manual_path=None):
             raise ValueError(f"check {check['id']} cwd escapes the worktree")
         env = os.environ.copy()
         env["PYTHONDONTWRITEBYTECODE"] = "1"
-        try:
-            proc = subprocess.run(check["argv"], cwd=cwd, env=env, text=True,
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                  check=False, shell=False)
-            stdout, stderr, exit_code = proc.stdout, proc.stderr, proc.returncode
-        except OSError as exc:
-            stdout, stderr, exit_code = "", str(exc), 127
         stdout_path, stderr_path = check_log / "stdout.log", check_log / "stderr.log"
-        stdout_path.write_text(stdout, encoding="utf-8")
-        stderr_path.write_text(stderr, encoding="utf-8")
+        timed_out = False
+        with stdout_path.open("w", encoding="utf-8") as out, stderr_path.open("w", encoding="utf-8") as err:
+            try:
+                proc = subprocess.Popen(check["argv"], cwd=cwd, env=env,
+                                        stdout=out, stderr=err, shell=False, start_new_session=True)
+                try:
+                    exit_code = proc.wait(timeout=check.get("timeout_seconds", 60))
+                except subprocess.TimeoutExpired:
+                    timed_out = True
+                    os.killpg(proc.pid, signal.SIGKILL)
+                    proc.wait(timeout=5)
+                    exit_code = 124
+                    err.write("\nVerification timeout exceeded; process group killed.\n")
+            except OSError as exc:
+                err.write(str(exc))
+                exit_code = 127
         results.append({"id": check["id"], "name": check["name"], "kind": "automated",
                         "argv": check["argv"], "cwd": str(cwd), "exit_code": exit_code,
+                        "timed_out": timed_out, "timeout_seconds": check.get("timeout_seconds", 60),
                         "status": "passed" if exit_code == 0 else "failed",
                         "acceptance_ids": check["acceptance_ids"],
                         "stdout": {"path": str(stdout_path), "sha256": _digest(stdout_path)},
@@ -193,6 +207,70 @@ def run_plan(plan_path, repo_path, receipt_path, logs_path, manual_path=None):
             "failures": failures, "issues": issues}
 
 
+def receipt_shape(receipt):
+    """Small explicit contract check before traversing untrusted receipt data."""
+    def text(v):
+        return isinstance(v, str) and bool(v.strip())
+    def strings(v):
+        return isinstance(v, list) and all(text(x) for x in v)
+    if not isinstance(receipt, dict):
+        return False
+    if type(receipt.get("schema_version")) is not int or receipt["schema_version"] != VERSION:
+        return False
+    if not all(text(receipt.get(k)) for k in ("mission_id", "created_at")):
+        return False
+    try:
+        if datetime.fromisoformat(receipt["created_at"].replace("Z", "+00:00")).tzinfo is None:
+            return False
+    except ValueError:
+        return False
+    if receipt.get("verdict") not in ("PASS", "FAIL", "INSUFFICIENT EVIDENCE"):
+        return False
+    if not all(strings(receipt.get(k)) for k in ("failures", "issues")):
+        return False
+    for key in ("source_before", "source_after"):
+        source = receipt.get(key)
+        if not isinstance(source, dict) or not all(text(source.get(k)) for k in ("repository", "worktree", "git_dir", "revision")):
+            return False
+        if "branch" not in source or (source["branch"] is not None and not text(source["branch"])) or not strings(source.get("dirty_paths")):
+            return False
+    acceptance = receipt.get("acceptance")
+    if not isinstance(acceptance, list) or not acceptance:
+        return False
+    ids = set()
+    for item in acceptance:
+        if not isinstance(item, dict) or not all(text(item.get(k)) for k in ("id", "requirement")) or item["id"] in ids:
+            return False
+        ids.add(item["id"])
+    automated = receipt.get("automated")
+    if not isinstance(automated, list) or not isinstance(receipt.get("manual"), list):
+        return False
+    check_ids = set()
+    for check in automated:
+        if not isinstance(check, dict) or not all(text(check.get(k)) for k in ("id", "name", "cwd")):
+            return False
+        if check["id"] in check_ids or check.get("kind") != "automated" or not strings(check.get("argv")) or not check["argv"]:
+            return False
+        check_ids.add(check["id"])
+        if type(check.get("exit_code")) is not int or check.get("status") not in ("passed", "failed"):
+            return False
+        if not strings(check.get("acceptance_ids")) or any(x not in ids for x in check["acceptance_ids"]):
+            return False
+        if type(check.get("timed_out")) is not bool:
+            return False
+        timeout = check.get("timeout_seconds")
+        if type(timeout) not in (int, float) or not math.isfinite(timeout) or not 0 < timeout <= 300:
+            return False
+        for key in ("stdout", "stderr"):
+            log = check.get(key)
+            if not isinstance(log, dict) or not text(log.get("path")) or not isinstance(log.get("sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", log["sha256"]):
+                return False
+    for item in receipt["manual"]:
+        if not isinstance(item, dict) or item.get("kind") != "manual" or not all(text(item.get(k)) for k in ("acceptance_id", "observed_by", "observation")) or item["acceptance_id"] not in ids:
+            return False
+    return True
+
+
 def validate_receipt(receipt_path, mission_id, repo_path):
     issues, failures = [], []
     try:
@@ -204,6 +282,12 @@ def validate_receipt(receipt_path, mission_id, repo_path):
     if not isinstance(receipt, dict) or receipt.get("schema_version") != VERSION:
         return {"verdict": "INSUFFICIENT EVIDENCE", "mission_id": mission_id,
                 "issues": ["Receipt schema is missing or unsupported."], "failures": []}
+    if not receipt_shape(receipt):
+        recorded = receipt.get("failures")
+        valid_failures = recorded if isinstance(recorded, list) and all(isinstance(x, str) and x.strip() for x in recorded) else []
+        return {"verdict": "FAIL" if valid_failures else "INSUFFICIENT EVIDENCE",
+                "mission_id": mission_id, "issues": ["Malformed or missing required receipt evidence."], "failures": valid_failures}
+    issues.extend(receipt["issues"])
     if receipt.get("mission_id") != mission_id:
         failures.append("Receipt mission_id does not match the requested assignment.")
     if receipt.get("verdict") != "PASS":
@@ -230,7 +314,7 @@ def validate_receipt(receipt_path, mission_id, repo_path):
             if not isinstance(check, dict) or check.get("kind") != "automated" or not isinstance(check.get("argv"), list):
                 issues.append("Receipt has a malformed automated check.")
                 continue
-            if check.get("exit_code") != 0 or check.get("status") != "passed":
+            if check.get("exit_code") != 0 or check.get("status") != "passed" or check["timed_out"]:
                 failures.append(f"Executed check {check.get('id', '?')} did not pass.")
             for key in ("stdout", "stderr"):
                 evidence = check.get(key)

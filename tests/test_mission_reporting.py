@@ -129,6 +129,59 @@ class ProductionEvidenceTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("revision", result.stdout.lower())
 
+    def test_tampered_and_malformed_receipts_never_pass(self):
+        _, receipt, _ = self.run_plan()
+        original = json.loads(receipt.read_text())
+        import copy
+        mutations = [
+            lambda r: r.update(issues=["missing verification"]),
+            lambda r: r.pop("failures"),
+            lambda r: r.update(schema_version=True),
+            lambda r: r.update(created_at=None),
+            lambda r: r["source_after"].pop("dirty_paths"),
+            lambda r: r.update(acceptance=[None]),
+            lambda r: r["acceptance"].append(r["acceptance"][0]),
+            lambda r: r["automated"][0].update(exit_code=False),
+            lambda r: r["automated"][0].update(argv=None),
+            lambda r: r["automated"][0].update(acceptance_ids=[{}]),
+            lambda r: r["automated"][0].update(stdout=None),
+            lambda r: r.update(manual=[{"kind": "manual"}]),
+            lambda r: r.pop("manual"),
+            lambda r: r.update(failures=[None]),
+        ]
+        for mutate in mutations:
+            value = copy.deepcopy(original)
+            mutate(value)
+            value["verdict"] = "PASS"
+            receipt.write_text(json.dumps(value))
+            result = self.validate(receipt)
+            self.assertIn(result.returncode, (1, 2), result.stdout + result.stderr)
+            self.assertIn(json.loads(result.stdout)["verdict"], ("FAIL", "INSUFFICIENT EVIDENCE"))
+        for commands, mission in (([{"id": "bad", "name": "bad", "argv": [sys.executable, "-c", "exit(1)"], "acceptance_ids": ["A1"]}], "failed"), ([], "insufficient")):
+            _, path, _ = self.run_plan(commands, mission)
+            value = json.loads(path.read_text()); value["verdict"] = "PASS"
+            path.write_text(json.dumps(value))
+            self.assertNotEqual(self.validate(path, mission).returncode, 0)
+        receipt.write_text(json.dumps(original))
+        Path(original["automated"][0]["stdout"]["path"]).unlink()
+        self.assertNotEqual(self.validate(receipt).returncode, 0)
+
+    def test_timeout_is_bounded_captures_partial_logs_and_blocks_tampering(self):
+        command = {"id": "sleep", "name": "bounded sleep", "argv": [sys.executable, "-c", "import time; print('partial', flush=True); time.sleep(30)"], "timeout_seconds": 0.1, "acceptance_ids": ["A1"]}
+        result, receipt, _ = self.run_plan([command])
+        self.assertEqual(result.returncode, 1)
+        value = json.loads(receipt.read_text())
+        self.assertTrue(value["automated"][0]["timed_out"])
+        self.assertIn("partial", Path(value["automated"][0]["stdout"]["path"]).read_text())
+        value["verdict"] = "PASS"
+        receipt.write_text(json.dumps(value))
+        self.assertEqual(self.validate(receipt).returncode, 1)
+        for index, timeout in enumerate((0, -1, True, 301, "1")):
+            command["timeout_seconds"] = timeout
+            result, path, _ = self.run_plan([command], "invalid-" + str(index))
+            self.assertEqual(result.returncode, 2)
+            self.assertFalse(path.exists())
+
     def test_cleanliness_is_required_before_runner_executes(self):
         (self.repo / "untracked.txt").write_text("dirty\n", encoding="utf-8")
         result, _, _ = self.run_plan()

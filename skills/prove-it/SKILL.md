@@ -48,3 +48,9 @@ Return the verdict, source identity, acceptance coverage, exact check results,
 manual observations, failures, gaps and receipt path. Do not infer success
 from a worker's completion or a written status declaration. A prior PASS is
 historical after any source change; rerun on the final integrated revision.
+
+Trusted checks may set `timeout_seconds` (default 60, finite positive maximum
+300). Invalid values are rejected before any execution. On timeout the POSIX
+process group is killed, partial regular-file stdout/stderr logs are retained,
+and exit 124 plus timed_out marks failure. Validation requires complete typed
+receipt evidence and blocks recorded issues even if the verdict is changed.
