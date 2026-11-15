@@ -1,0 +1,78 @@
+{
+  "mission_id": "focused-v2-skills-and-evidence-gate",
+  "source": {
+    "repository": "systemsbyzane/zstack",
+    "branch": "feat/focused-v2",
+    "revision": "ae98c80466bfff5a105c927f0d854d5827ae48d5"
+  },
+  "tested_revision": "ae98c80466bfff5a105c927f0d854d5827ae48d5",
+  "original_acceptance": [
+    {
+      "id": "A1",
+      "requirement": "Add concise reusable /dispatch, /decompose, /integrate, /prove-it, /brief-me, /recover, /status, and /redirect skills while preserving the Chief, Coordinator, and existing Council roles.",
+      "status": "verified",
+      "evidence": ["skills/dispatch/SKILL.md", "skills/decompose/SKILL.md", "skills/integrate/SKILL.md", "skills/prove-it/SKILL.md", "skills/brief-me/SKILL.md", "skills/recover/SKILL.md", "skills/status/SKILL.md", "skills/redirect/SKILL.md", "skills/cortex/SKILL.md", "skills/cortex-coordinator/SKILL.md", "skills/council/SKILL.md is unchanged"]
+    },
+    {
+      "id": "A2",
+      "requirement": "Make the Chief dispatch separate Coordinator assignments, keep meaningful worker delegation and routine recovery with the Coordinator, and redirect the same active assignment.",
+      "status": "verified",
+      "evidence": ["skills/dispatch/SKILL.md", "skills/decompose/SKILL.md", "skills/recover/SKILL.md", "skills/redirect/SKILL.md"]
+    },
+    {
+      "id": "A3",
+      "requirement": "Require exact source identity, original acceptance coverage, actual checks, failures, and unverified items before a successful delivery; failed or missing verification must block success.",
+      "status": "verified",
+      "evidence": ["skills/prove-it/SKILL.md", "skills/prove-it/references/mission-report.md", "skills/prove-it/scripts/prove_it.py", "python3 -m unittest discover -s tests -v: failure, mismatch, and missing-evidence cases passed"]
+    },
+    {
+      "id": "A4",
+      "requirement": "Add targeted executable tests for the production gate and mission reporting paths, preferably using the standard library.",
+      "status": "verified",
+      "evidence": ["tests/test_mission_reporting.py", "python3 -m unittest discover -s tests -v: Ran 4 tests; OK"]
+    },
+    {
+      "id": "A5",
+      "requirement": "Render a real-data HTML brief with native preview/render tools, theme variables, transparent outer page, responsive desktop/mobile widths, clamped render height, and no fabricated report data.",
+      "status": "verified",
+      "evidence": ["skills/brief-me/scripts/brief_me.py", "artifacts/focused-v2-brief.html", "Native html_preview at 728px and 360px and html_render of the same report"]
+    },
+    {
+      "id": "A6",
+      "requirement": "Document installation, usage, evidence instructions, and acceptance demonstrations that distinguish executable tests from unverified live T3 behavior.",
+      "status": "verified",
+      "evidence": ["README.md: Install, Commands, Evidence and acceptance", "This report's unverified list names untested live T3 dispatch and delegation behavior"]
+    }
+  ],
+  "checks": [
+    {
+      "name": "Mission reporting unit tests",
+      "command": "python3 -m unittest discover -s tests -v",
+      "status": "passed",
+      "evidence": ["4 tests passed on ae98c80466bfff5a105c927f0d854d5827ae48d5"]
+    },
+    {
+      "name": "Python compilation",
+      "command": "python3 -m compileall -q skills/prove-it/scripts/prove_it.py skills/brief-me/scripts/brief_me.py tests/test_mission_reporting.py",
+      "status": "passed",
+      "evidence": ["Exited 0 on ae98c80466bfff5a105c927f0d854d5827ae48d5"]
+    },
+    {
+      "name": "Whitespace validation",
+      "command": "git diff --check",
+      "status": "passed",
+      "evidence": ["Exited 0 with no diagnostics on ae98c80466bfff5a105c927f0d854d5827ae48d5"]
+    },
+    {
+      "name": "Native HTML preview and render",
+      "command": "html_preview at 728px and 360px; html_render at clamped preview height",
+      "status": "passed",
+      "evidence": ["Both previews completed with no console messages; html_render returned a rendered attachment"]
+    }
+  ],
+  "failures": [],
+  "unverified": [
+    "Live T3 creation and routing of separate Coordinator threads was not exercised.",
+    "Live Coordinator delegation to meaningful worker threads and routine recovery were not exercised."
+  ]
+}
