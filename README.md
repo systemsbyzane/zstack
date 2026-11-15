@@ -59,6 +59,17 @@ transparency, and the narrow-screen layout. They do not prove that a live T3
 Chief can create threads, that Coordinators can delegate or recover work, or
 that a report's declared evidence is truthful.
 
+## Acceptance coverage correction
+
+The earlier focused-v2 report did not state the requirement to show multiple
+independent missions in a chief portfolio, and its redirect coverage was a
+written contract rather than a live redirect demonstration. The renderer now
+has targeted tests for separately rendered active, review-ready, and attention
+missions, including link safety. A contract test checks that `/redirect`
+retains the active assignment. Live T3 routing and redirect behavior remain
+unverified; the earlier report's evidence revision remains historical and is
+not the revision of this correction.
+
 For an assignment, preserve its original acceptance in the report, record the
 exact tested commit and actual command output, and run `prove_it.py` against
 that report. Only `PASS` allows successful delivery. To demonstrate an HTML

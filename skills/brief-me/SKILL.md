@@ -16,6 +16,16 @@ outcomes, timestamps, checks, or evidence. The renderer obtains its verdict
 from the sibling `prove-it` gate. If a required value is absent, show the gate's
 `INSUFFICIENT EVIDENCE` result and identify the gap.
 
+For a chief portfolio, the same command accepts either a top-level `missions`
+array or a `portfolio` object containing `chief_summary` and `missions`. Each
+mission can supply `name`, `status`, `progress`, `verification`, and `pr_url`
+or `artifact_url` (or `pr` / `artifact` objects with `url` and optional
+`label`). Missions are grouped by their declared `active`, `review-ready`, or
+`attention` status; other declared statuses stay under Other missions. Values
+are displayed as supplied, and only HTTP(S) or safe relative artifact URLs are
+made clickable. A single mission report continues to use the evidence-gate
+brief.
+
 Discover whether native `html_preview` and `html_render` are available in the
 active host before choosing how to display the page. When present, call
 `html_preview` on the generated HTML at 728px and 360px, inspect both outputs,

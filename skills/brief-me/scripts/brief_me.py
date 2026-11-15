@@ -6,6 +6,7 @@ import html
 import importlib.util
 import json
 from pathlib import Path
+from urllib.parse import urlsplit
 
 
 GATE_PATH = Path(__file__).resolve().parents[2] / "prove-it" / "scripts" / "prove_it.py"
@@ -51,7 +52,91 @@ def strings(items, missing):
     return "<ul>" + "".join(f"<li>{esc(item)}</li>" for item in items) + "</ul>"
 
 
+def safe_href(value):
+    """Allow web links and simple relative artifact links, never active schemes."""
+    if not isinstance(value, str) or not value.strip():
+        return None
+    value = value.strip()
+    if any(ord(char) < 32 for char in value) or "\\" in value:
+        return None
+    parts = urlsplit(value)
+    if parts.scheme:
+        return value if parts.scheme.lower() in ("http", "https") and parts.netloc else None
+    if parts.netloc or value.startswith("/") or value.startswith("//"):
+        return None
+    if any(part == ".." for part in parts.path.split("/")):
+        return None
+    return value
+
+
+def link(value, default_label):
+    if isinstance(value, dict):
+        href = safe_href(value.get("url"))
+        label = value.get("label") or value.get("url") or default_label
+    else:
+        href = safe_href(value)
+        label = value or default_label
+    if not href:
+        return esc(value if value is not None else "Not supplied")
+    return f'<a href="{esc(href)}" rel="noopener noreferrer">{esc(label)}</a>'
+
+
+def portfolio_mission(item):
+    if not isinstance(item, dict):
+        return f"<li>{esc(item)}</li>"
+    name = item.get("name", item.get("mission_id"))
+    fields = (("status", "Status"), ("progress", "Progress"), ("verification", "Verification"))
+    rows = "".join(f"<dt>{label}</dt><dd>{esc(item.get(key))}</dd>" for key, label in fields if key in item)
+    links = []
+    for key, label in (("pr_url", "Pull request"), ("pr", "Pull request"),
+                       ("artifact_url", "Artifact"), ("artifact", "Artifact")):
+        if key in item and item[key] is not None:
+            links.append(f"<dt>{label}</dt><dd>{link(item[key], label)}</dd>")
+    if rows or links:
+        rows = f"<dt>Mission</dt><dd>{esc(name)}</dd>" + rows + "".join(links)
+        details = f"<dl>{rows}</dl>"
+    else:
+        details = f"<p>{esc(name)}</p>"
+    return f"<li>{details}</li>"
+
+
+def render_portfolio(data):
+    portfolio = data.get("portfolio") if isinstance(data.get("portfolio"), dict) else data
+    missions = portfolio.get("missions")
+    missions = missions if isinstance(missions, list) else []
+    summary = f"<p>{esc(portfolio.get('chief_summary'))}</p>" if portfolio.get("chief_summary") else ""
+    sections = []
+    groups = (("active", {"active", "in progress", "in-progress"}),
+              ("review-ready", {"review-ready", "review ready", "ready for review"}),
+              ("attention", {"attention", "blocked", "at risk", "failed"}))
+    assigned = set()
+    for title, statuses in groups:
+        matching = [m for m in missions if isinstance(m, dict) and str(m.get("status", "")).strip().lower() in statuses]
+        assigned.update(id(m) for m in matching)
+        if matching:
+            sections.append(card(title.title(), "<ul class='records'>" + "".join(portfolio_mission(m) for m in matching) + "</ul>"))
+    other = [m for m in missions if id(m) not in assigned]
+    if other:
+        sections.append(card("Other missions", "<ul class='records'>" + "".join(portfolio_mission(m) for m in other) + "</ul>"))
+    if not sections:
+        sections.append(card("Missions", '<p class="muted">No missions supplied</p>'))
+    return f'''<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{{color-scheme:light dark}}*{{box-sizing:border-box}}
+html,body{{margin:0;padding:0;background:transparent;color:var(--foreground);font-family:var(--font-sans,system-ui,sans-serif)}}
+main{{width:100%;max-width:100%;display:grid;gap:12px}}h1{{font-size:1.35rem;margin:0}}h2{{font-size:1rem;margin:0 0 12px}}
+p{{margin:0;overflow-wrap:anywhere}}.muted{{color:var(--muted-foreground,var(--muted))}}
+.card{{padding:16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);color:var(--card-foreground,var(--foreground));min-width:0}}
+ul{{margin:0;padding-left:20px}}li+li{{margin-top:10px}}.records{{list-style:none;padding:0}}
+dl{{display:grid;grid-template-columns:minmax(95px,140px) minmax(0,1fr);gap:4px 10px;margin:0}}dt{{color:var(--muted-foreground,var(--muted));font-size:.85rem}}dd{{margin:0;overflow-wrap:anywhere}}
+a{{color:var(--link,var(--primary));overflow-wrap:anywhere}}@media(max-width:420px){{dl{{grid-template-columns:1fr;gap:2px}}}}
+</style></head><body><main><h1>Mission portfolio</h1>{summary}{''.join(sections)}</main></body></html>'''
+
+
 def render(data):
+    if isinstance(data, dict) and ("portfolio" in data or "missions" in data):
+        return render_portfolio(data)
     gate = GATE.evaluate(data)
     source = gate["source"] if isinstance(gate["source"], dict) else {}
     verdict = gate["verdict"]
