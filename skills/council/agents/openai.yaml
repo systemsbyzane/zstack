@@ -1,6 +1,6 @@
 interface:
   display_name: "Council"
-  short_description: "Sol, Muse, and Luna reviews with a bounded fix loop"
-  default_prompt: "Use $council to review the current change with Sol 6.1, Muse Wonder, and Luna max, then loop through evidence-backed fixes within the existing task authority."
+  short_description: "Risk-based independent review with actual model receipts"
+  default_prompt: "Use $council for proportionate, risk-based independent review. Choose suitable available reviewers using current host capabilities, record actual model receipts and any fallback, and return evidence-backed findings."
 policy:
   allow_implicit_invocation: true

@@ -9,17 +9,27 @@ This is the user's home thread. The normal workflow is user task → Cortex → 
 
 ## Task authority and continuity
 
+Use `/dispatch` for new independent outcomes, `/status` for evidence-backed
+updates, and `/redirect` to change the method or scope of an existing
+assignment. A redirect stays with its current Coordinator unless ownership or
+the outcome itself must change. Command contracts live in sibling skills.
+
 A user's task authorizes the ordinary implementation, investigation, local setup, integration, focused testing, fixes, and deliverable preparation reasonably necessary to complete that task. Carry that authority across coordinators, workers, turns, and recovery. Do not make the user restate detailed instructions or approve routine steps. A requested PR includes the necessary branch, commits, push, and PR creation, subject to host/repository rules. It does not imply merging or deploying unless requested. Preserve explicit exclusions and environment restrictions.
 
 Ask the user only for an essential missing fact, private authentication that cannot be completed unattended, a consequential scope/product decision, an action outside the task's authority, or a real blocker with no viable authorized recovery. Never ask because an arbitrary time slice expired or a worker ended. Existing explicit hard limits remain binding until the user changes them; general usage concerns are not hard caps.
 
 ## Route the outcome
 
+Follow [model routing](references/model-routing.md) for current capability
+discovery, model selection, fallback, and dispatch receipts. The Chief routes
+independent outcomes and keeps substantial product implementation with each
+Coordinator; send follow-ups and recovery to the existing Coordinator.
+
 Follow [clear task communication](references/communication.md) for assignments, changes, and results. Send concise, readable outcome briefs; keep history and accounting in the tracker. Follow-ups state only the relevant change and explicitly supersede conflicting instructions.
 
-Read [protocol.md](references/protocol.md) for identity, launch, and event handling. Resolve actual T3 identity and maintain atomic chief state at `~/.codex/cortex/chiefs/<actual-thread-id>/state.json`, preserving records and excluding secrets. Use [status reporting](references/status-reporting.md) for the sanitized projection.
+Read [protocol.md](references/protocol.md) for identity, launch, and event handling. Resolve actual T3 identity and maintain atomic chief state at `~/.codex/cortex/chiefs/<actual-thread-id>/state.json`, preserving records and excluding secrets. Use [status reporting](references/status-reporting.md) for the sanitized projection. The Chief is the sole writer of state and projection. Before accepting a Coordinator's delivery as successful, run `skills/prove-it/scripts/prove_it.py validate <receipt> --mission <assignment-id> --repo <repository>` and require a live `PASS`; a worker declaration or prior/historical receipt is not sufficient.
 
-Create the separate assignment coordinator thread requested by this workflow using supported T3 binding. Include the user's actual task, ordered phases, acceptance criteria, authority, environment, deliverables, and chief return destination. Preserve phase order: do not turn a baseline/evaluate/fix/benchmark assignment into indefinite tuning of one example. Multiple coordinators are useful only for independently owned outcomes. Reuse the existing coordinator for continuation.
+Create a separate Coordinator thread for each new independent outcome using supported host binding. Include the user's actual task, ordered phases, acceptance criteria, authority, environment, deliverables, model target, and Chief return destination. Preserve phase order: do not turn a baseline/evaluate/fix/benchmark assignment into indefinite tuning of one example. Multiple Coordinators are useful only for independently owned outcomes. Reuse the existing Coordinator for continuation.
 
 The coordinator owns how to delegate, integrate changes, run appropriate checks, correct failures, and produce evidence. Give it an outcome and known context, not a succession of tiny command approvals. Keep one technical owner responsible for a mutable runtime through its phase. Delegate parallel work only where ownership is independent.
 

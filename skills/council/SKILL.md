@@ -1,13 +1,21 @@
 ---
 name: council
-description: Run independent advisory review through the user's configured Council models when Council is requested or appropriate, then synthesize evidenced findings and verify justified corrections.
+description: Run an optional, risk-based independent advisory review with suitable available models, then synthesize evidenced findings and verify justified corrections.
 ---
 
 # Council
 
 Use independent review to answer the actual scoped question, not as an automatic gate on every Cortex assignment. Cortex coordinators own integrated review and can perform integration/testing directly. User task authority and explicit panel overrides persist.
 
-Default panel when Council is invoked: Codex `gpt-6.1-sol` high; Cursor `muse-wonder-1.0` high; Codex `gpt-6-luna` max. Resolve actual provider/model IDs and option keys through capabilities. A catalog entry is not authentication proof. Do not silently replace specifically requested seats or claim full Council approval when a seat is missing. Respect user-authorized single-provider review and disclose the actual reviewers.
+Council is optional and risk-based. Select reviewers based on the question,
+risk, independence, and actual provider availability; do not require a fixed
+three-seat panel, Muse, or every provider. Follow the shared
+[model routing policy](../cortex/references/model-routing.md) for capability
+discovery, explicit targets, fallback, and receipts. A catalog entry alone is
+not proof that a provider can run a child task. A suitable fallback may replace
+an unavailable preferred seat without permission; record the substitution and
+reason, then report the actual reviewers and review scope. `muse-wonder-1.0` is
+not a discovered current model ID.
 
 Give each reviewer the task intent, exact frozen revision/artifact/diff, relevant repository rules, acceptance, actual checks, known limits, and a clear review question. Reviewers are read-only: no source changes, commits, pushes, cloud/database mutations, secrets, external messages, or nested delegation. Follow host concurrency and tool rules; use a fresh delegated task for every review/recheck. Do not poll. Preserve source identity while reviewers run.
 

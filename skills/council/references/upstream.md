@@ -5,7 +5,15 @@ Inspected 2026-11-07:
 - https://github.com/t3dotgg/tstack/blob/main/skills/council/SKILL.md
 - https://github.com/t3dotgg/tstack/blob/main/skills/sol-loop/SKILL.md
 
-This personal adaptation combines independent panel review with fresh reviews after verified, narrowly scoped fixes and a bounded disagreement ledger. It replaces provider defaults with the user's Sol/Muse/Luna panel. It does not adopt automatic PR-description writes, publication, force-push, or merge authority from other tstack skills. Current harness rules take precedence over tool mechanics in upstream examples.
+This personal adaptation retains independent review, fresh reviews after
+verified, narrowly scoped fixes, and a bounded disagreement ledger. Earlier
+versions named Sol/Muse/Luna reviewers; that was historical guidance, not a
+current panel requirement. Current optional, risk-based reviewer selection is
+defined in [the Council skill](../SKILL.md) and the shared [model routing
+policy](../../cortex/references/model-routing.md). It does not adopt automatic
+PR-description writes, publication, force-push, or merge authority from other
+tstack skills. Current harness rules take precedence over tool mechanics in
+upstream examples.
 
 Upstream is distributed under the following license:
 

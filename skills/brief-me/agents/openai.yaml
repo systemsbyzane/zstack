@@ -1,0 +1,4 @@
+interface:
+  display_name: "Brief Me"
+  short_description: "Render a real-data mission brief"
+  default_prompt: "Render the Chief's sanitized status projection with native HTML preview tools when available."

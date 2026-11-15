@@ -1,0 +1,4 @@
+interface:
+  display_name: "Integrate"
+  short_description: "Integrate and verify the combined change"
+  default_prompt: "Use $integrate to combine completed work, check the production path, fix failures, and rerun affected verification."

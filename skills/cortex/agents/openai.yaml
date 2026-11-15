@@ -1,4 +1,4 @@
 interface:
   display_name: "Cortex"
   short_description: "Route tasks and return integrated verified results"
-  default_prompt: "Use $cortex as my chief of staff. Give coordinators the task and its authority, let them delegate, integrate and verify, then bring the result back here for my review."
+  default_prompt: "Invoke the Cortex skill through the host's available skill selector. Route independent outcomes to coordinators with their authority, let them delegate, integrate and verify, then bring the result back here for my review."

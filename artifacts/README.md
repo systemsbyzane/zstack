@@ -1,0 +1,1 @@
+These are historical worker evidence snapshots for ae98c80466bfff5a105c927f0d854d5827ae48d5, with four tests at that revision. They are not final verification evidence. The corrected implementation has six tests. Final exact-revision reports and native rendering receipts are kept in the local Chief state at ~/.codex/cortex/focused-v2-evidence/ and linked in the PR description.
