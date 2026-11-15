@@ -29,7 +29,7 @@ def safe_href(value):
     except ValueError:
         return None
     if parts.scheme:
-        return value if parts.scheme.lower() in ("http", "https") and parts.netloc else None
+        return value if parts.scheme.lower() in ("http", "https", "t3-thread") and parts.netloc else None
     decoded = unquote(parts.path)
     if parts.netloc or value.startswith(("/", "//")) or "\\" in decoded or ".." in decoded.split("/"):
         return None
