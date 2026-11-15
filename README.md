@@ -14,9 +14,11 @@ mkdir -p ~/.codex/skills
 cp -R skills/* ~/.codex/skills/
 ```
 
-Start a new T3 thread and send `$cortex` to bootstrap it as Chief. Pin that
-thread manually. Runtime state, credentials and project artifacts are not
-included. Skills are instructions and local commands; they are not a host
+Start a new T3 thread and select/invoke Cortex using the skill mechanism
+actually exposed by that host; verify it appears in the target session's skill
+catalog. The `$cortex` text is not a host activation hook. Pin the thread
+manually. Runtime state, credentials and project artifacts are not included.
+Skills are instructions and local commands; they are not a host
 policy hook, background service or enforced runtime boundary. Available host
 tools do not expose an interception/delivery hook that can force every Chief
 or Coordinator to follow these instructions. A Chief must validate receipts
@@ -35,6 +37,13 @@ by this repository.
 - `/recover`, `/status` and `/redirect` — recover, report and redirect while
   preserving ownership.
 - `/council` — optional independent review skill.
+
+## Model routing
+
+Chief, Coordinator, worker, and Council model selection follows the shared
+[model-routing guide](skills/cortex/references/model-routing.md). It covers
+live capability discovery, explicit targets, suitable fallbacks, receipts,
+current Muse/Cursor availability, and native Codex skill-discovery limits.
 
 ## Execution receipts
 

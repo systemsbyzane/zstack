@@ -8,6 +8,8 @@ description: "Own a Cortex assignment end to end: delegate useful work, integrat
 Own the assignment through completion. The workflow is Cortex → coordinator → subagents → coordinator integration/testing → Cortex → user review. Do not bootstrap another chief. Preserve the user's task, phase order, acceptance criteria, authority, environment restrictions, and requested deliverables across turns.
 
 Read [delegation.md](references/delegation.md) before dispatch, [clear task communication](../cortex/references/communication.md) when writing briefs and follow-ups, and [evidence.md](references/evidence.md) when planning verification or delivery.
+Use the shared [model routing policy](../cortex/references/model-routing.md)
+for discovery, explicit targets, fallback, receipts, and provider suitability.
 
 ## Authority and execution ownership
 
@@ -35,7 +37,7 @@ Carry the user's ordered phases as an execution contract. In a cohort evaluation
 
 Integrate returned work, test the actual affected behavior, fix evidenced issues, and verify the combined result. Choose focused tests, builds, type checks, evaluation runners, real provider calls, and UI/persistence checks appropriate to the task. Tests are neither universally forbidden nor a coverage project; follow any task-specific testing preference. Reuse actual inputs and the real production path instead of testing a copied implementation. Keep baseline/candidate identity clear without building unnecessary verification infrastructure.
 
-Review proportionately. Use independent review for consequential changes or when requested; Council applies when explicitly requested or when its panel is appropriate and available. Do not require every model/provider or a full panel on every assignment. Reproduce or substantiate findings before expanding scope. Fix small findings directly where host rules require; substantial fixes may go to the owner. New delegated reviews/rechecks use fresh tasks as required by the host. Stop a failing approach and change it deliberately rather than repeating patch/review cycles without measured gains.
+Review proportionately. Use independent review for consequential changes or when requested; Council applies when explicitly requested or when independent, risk-based review is appropriate and available. Do not require every model/provider or a fixed panel on every assignment. Reproduce or substantiate findings before expanding scope. Fix small findings directly where host rules require; substantial fixes may go to the owner. New delegated reviews/rechecks use fresh tasks as required by the host. Stop a failing approach and change it deliberately rather than repeating patch/review cycles without measured gains.
 
 ## Quiet progress checks
 
@@ -47,7 +49,7 @@ This is event-driven supervision, not background monitoring: follow the delegate
 
 ## Usage and escalation
 
-No default hourly, call, repair-cycle, or review-round budgets require chief renewal. Use judgment to keep usage proportional: no redundant setup, duplicate workers, repeated blind retries, premature review panels, or idle execution while awaiting user input. Explicit user hard ceilings and global worker limits remain binding. Model choice follows task complexity and demonstrated performance; Luna is not mandatory. Resolve actual provider/model capabilities, disclose choices, and never silently substitute a specifically requested model.
+No default hourly, call, repair-cycle, or review-round budgets require Chief renewal. Use judgment to keep usage proportional: no redundant setup, duplicate workers, repeated blind retries, premature review panels, or idle execution while awaiting user input. Explicit user hard ceilings and global worker limits remain binding. Resolve current provider/model capabilities, choose suitable routes, and record actual targets and receipts. When a requested or preferred route is unavailable, use a suitable discovered fallback under the shared policy and record the reason; do not turn a viable fallback into a permission gate.
 
 Routine errors are resolved within the current outcome. Escalate to the chief only when coordination/priority changes matter, an approach has no viable authorized continuation, or user input is truly needed. Send a material milestone when it changes a dependency, a real blocker promptly, and a complete result when acceptance is met. Do not pause because a time target expired; preserve accounting if requested and continue within actual authority. No acknowledgment loops or polling/watchdogs. Follow supported completion wakes.
 

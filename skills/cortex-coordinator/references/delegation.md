@@ -2,7 +2,13 @@
 
 Use the shared [clear communication contract](../../cortex/references/communication.md). Initial briefs explain outcome, starting point, ownership/authority, acceptance, and return. Follow-ups contain the change, reason, and next action instead of repeating the full assignment. Never concatenate ordinary words or dump accumulated constraints and historical accounting into a prompt.
 
-Use the active host's supported orchestration tools and binding rules. Discover capabilities before the first dispatch as required. Model/provider/settings choices must be supported. Preserve explicit user model choices; otherwise choose for the task and escalate capability when repeated failures show the current allocation is unsuitable. Neither Luna-only nor mandatory multi-provider execution is a Cortex requirement.
+Use the active host's supported orchestration tools and binding rules. Discover
+capabilities before dispatch and follow the shared
+[model routing policy](../../cortex/references/model-routing.md): make explicit
+provider/model/option choices, prefer suitability and actual availability,
+record returned receipts, and use a suitable discovered fallback when a
+preference is unavailable. Neither Luna-only nor mandatory multi-provider
+execution is a Cortex requirement.
 
 Delegate outcomes with enough authority and context to finish, not tiny commands. State acceptance, phase order, workspace/revision, relevant source/runtime pointers, ownership, verified setup, task authority, exclusions, and required evidence. Use readable paragraphs. Keep one technical owner for connected work; direct worker-to-worker handoffs are allowed through supported tools when authorized and useful. The coordinator integrates and verifies, and may perform hands-on work rather than forcing a delegation for every action.
 

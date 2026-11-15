@@ -14,3 +14,5 @@ work. Preserve phase order and keep verification with the integrating owner.
 Follow `skills/cortex-coordinator/references/delegation.md`. Use the active
 host's supported delegation tools and required capability discovery. Do not
 delegate a command, typo, or ordinary recovery as a separate assignment.
+Apply `skills/cortex/references/model-routing.md` to worker selection,
+fallbacks, and receipts.

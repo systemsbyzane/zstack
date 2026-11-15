@@ -14,4 +14,7 @@ Dispatch separate Coordinators only for genuinely independent outcomes. Each
 Coordinator owns its assignment through worker delegation, integration,
 recovery, verification, and delivery. Reuse the existing Coordinator for
 continuation. Follow `skills/cortex/references/protocol.md` and the active
-host's tool rules. Never convert a routine error into a user approval request.
+host's tool rules. Use
+`skills/cortex/references/model-routing.md` for current capability discovery,
+explicit Coordinator targets, and dispatch receipts. Never convert a routine
+error or a viable model fallback into a user approval request.
